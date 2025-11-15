@@ -13,7 +13,24 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Exports\Templates\OrderReport.html" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Exports\Templates\OrderReport.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Infrastructure\Exports\Templates\OrderReport.html">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<!-- ASP.NET Core 10 -->
+		<PackageReference Include="ClosedXML" Version="0.105.0" />
+		<PackageReference Include="itext.pdfhtml" Version="6.3.0" />
+		<PackageReference Include="itext7" Version="8.0.0" />
+		<PackageReference Include="itext.bouncy-castle-adapter" Version="9.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
 

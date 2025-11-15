@@ -19,30 +19,23 @@ public class JwtTokenService(IOptions<JwtSettings> jwtOptions, UserManager<User>
     public async Task<string> GenerateAccessToken(string userId, string email)
     {
         var user = await userManager.FindByIdAsync(userId);
-        if (user == null)
-            throw new Exception("User not found");
+        if (user == null) throw new Exception("User not found");
 
         var securityStamp = await userManager.GetSecurityStampAsync(user);
 
         var claims = new[]
         {
-        new Claim(ClaimTypes.NameIdentifier, userId),
-        new Claim(ClaimTypes.Email, email),
-        new Claim("securityStamp", securityStamp),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        new Claim(JwtRegisteredClaimNames.Sub, userId)
-    };
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Email, email),
+            new Claim("securityStamp", securityStamp),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, userId)
+        };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenDurationInMinutes),
-            signingCredentials: creds
-        );
+        var token = new JwtSecurityToken(issuer: _jwtSettings.Issuer, audience: _jwtSettings.Audience, claims: claims, expires: DateTime.UtcNow.AddHours(_jwtSettings.AccessTokenDurationInMinutes), signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

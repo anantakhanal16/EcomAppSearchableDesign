@@ -17,6 +17,12 @@ namespace Infrastructure.Services
 
         public async Task<HttpResponses<ProductResponseDto>> CreateProductAsync(ProductCreateDto dto, CancellationToken cancellationToken)
         {
+            var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID);
+            if (supplier == null)
+            {
+                return HttpResponses<ProductResponseDto>.FailResponse("Supplier doesnot exists.");
+            }
+
             var product = new Product
             {
                 ProductName = dto.ProductName,
@@ -47,8 +53,7 @@ namespace Infrastructure.Services
         public async Task<HttpResponses<string>> DeleteProductAsync(int id, CancellationToken cancellationToken)
         {
             var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken);
-            if (product == null)
-                return HttpResponses<string>.FailResponse("Product not found.");
+            if (product == null) return HttpResponses<string>.FailResponse("Product not found.");
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync(cancellationToken);
@@ -57,18 +62,16 @@ namespace Infrastructure.Services
 
         public async Task<HttpResponses<List<ProductResponseDto>>> GetAllProductsAsync(CancellationToken cancellationToken)
         {
-            var products = await _context.Products
-                .Select(p => new ProductResponseDto
-                {
-                    ProductID = p.ProductID,
-                    ProductName = p.ProductName,
-                    Category = p.Category,
-                    Price = p.Price,
-                    StockQuantity = p.StockQuantity,
-                    SupplierID = p.SupplierID,
-                    IsActive = p.IsActive
-                })
-                .ToListAsync(cancellationToken);
+            var products = await _context.Products.Select(p => new ProductResponseDto
+            {
+                ProductID = p.ProductID,
+                ProductName = p.ProductName,
+                Category = p.Category,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                SupplierID = p.SupplierID,
+                IsActive = p.IsActive
+            }).ToListAsync(cancellationToken);
 
             return HttpResponses<List<ProductResponseDto>>.SuccessResponse(products, "Products retrieved successfully.");
         }
@@ -76,8 +79,7 @@ namespace Infrastructure.Services
         public async Task<HttpResponses<ProductResponseDto>> GetProductByIdAsync(int id, CancellationToken cancellationToken)
         {
             var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken);
-            if (product == null)
-                return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
+            if (product == null) return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
 
             var response = new ProductResponseDto
             {
@@ -96,8 +98,12 @@ namespace Infrastructure.Services
         public async Task<HttpResponses<ProductResponseDto>> UpdateProductAsync(int id, ProductUpdateDto dto, CancellationToken cancellationToken)
         {
             var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken);
-            if (product == null)
-                return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
+            if (product == null) return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
+            var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID);
+            if (supplier == null)
+            {
+                return HttpResponses<ProductResponseDto>.FailResponse("Supplier doesnot exists.");
+            }
 
             product.ProductName = dto.ProductName;
             product.Category = dto.Category;

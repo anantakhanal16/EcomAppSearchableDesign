@@ -82,6 +82,7 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
         UserLoginResponse userLoginResponse = new UserLoginResponse() { accessToken = accessToken };
         return ServiceResponseData<UserLoginResponse>.Success("Token refreshed", userLoginResponse);
     }
+
     public async Task<ServiceResponseData<string>> LogoutAsync(CancellationToken cancellationToken)
     {
         var principal = httpContextAccessor.HttpContext?.User;
@@ -90,13 +91,12 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
         {
             return ServiceResponseData<string>.Failure("User is not authenticated");
         }
+
         var email = principal.FindFirst(ClaimTypes.Email)?.Value;
-        if (string.IsNullOrEmpty(email))
-            return ServiceResponseData<string>.Failure("Invalid user email");
+        if (string.IsNullOrEmpty(email)) return ServiceResponseData<string>.Failure("Invalid user email");
 
         var user = await userManager.FindByEmailAsync(email);
-        if (user == null)
-            return ServiceResponseData<string>.Failure("User not found");
+        if (user == null) return ServiceResponseData<string>.Failure("User not found");
 
 
         user.RefreshToken = null;

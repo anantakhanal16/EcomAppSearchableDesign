@@ -42,10 +42,7 @@ public class ExceptionMiddleware
 
         context.Response.StatusCode = (int)statusCode;
 
-        var errorResponse = HttpResponses<string>.ErrorResponse(
-            message: ex.Message,
-            statusCode: statusCode
-        );
+        var errorResponse = HttpResponses<string>.ErrorResponse(message: ex.Message, statusCode: statusCode);
 
         var json = JsonSerializer.Serialize(errorResponse, new JsonSerializerOptions
         {

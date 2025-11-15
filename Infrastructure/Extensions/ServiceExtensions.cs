@@ -11,6 +11,8 @@ namespace Infrastructure.ServiceExtensions
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
             services.AddScoped<IProductService, ProductService>(); 
+            services.AddScoped<IUtlityServices, UtlitesServices>(); 
+            services.AddScoped<IOrderService, OrderService>(); 
             return services;
         }
     }

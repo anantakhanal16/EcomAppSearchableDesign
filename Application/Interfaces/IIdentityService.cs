@@ -11,6 +11,5 @@ namespace Application.Interfaces
         Task<ServiceResponseData<User>> GetUserDetails(CancellationToken cancellationToken);
         Task<ServiceResponseData<UserLoginResponse>> GenerateRefreshToken(string token, CancellationToken cancellationToken);
         Task<ServiceResponseData<string>> LogoutAsync(CancellationToken cancellationToken);
-
     }
 }

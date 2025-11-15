@@ -4,7 +4,7 @@ using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers;
+namespace EcomAppSearchableDesign.Controllers;
 
 [Authorize]
 [ApiController]
