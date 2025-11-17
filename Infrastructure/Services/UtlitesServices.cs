@@ -1,9 +1,6 @@
 ﻿using Application.Interfaces;
 using iText.Kernel.Pdf;
-using iText.Layout;
-using iText.Layout.Element;
 using iText.Html2pdf;
-using iText.Layout.Properties;
 using ClosedXML.Excel;
 
 namespace Infrastructure.Services
@@ -53,11 +50,9 @@ namespace Infrastructure.Services
 
             var properties = typeof(T).GetProperties();
 
-            // Dynamically create table headers
             var headersHtml = string.Join("", properties.Select(p => $"<th>{p.Name}</th>"));
             htmlTemplate = htmlTemplate.Replace("{{Headers}}", headersHtml);
 
-            // Dynamically create table rows
             var rowsHtml = string.Join("", data.Select(item =>
             {
                 var cellsHtml = string.Join("", properties.Select(p =>
@@ -77,7 +72,6 @@ namespace Infrastructure.Services
 
             htmlTemplate = htmlTemplate.Replace("{{Rows}}", rowsHtml);
 
-            // Generate PDF
             using var stream = new MemoryStream();
             using var writer = new PdfWriter(stream);
             using var pdfDoc = new PdfDocument(writer);

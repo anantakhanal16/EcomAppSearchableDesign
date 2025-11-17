@@ -2,6 +2,7 @@
 using Application.Helpers;
 using Application.Interfaces;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
@@ -9,19 +10,41 @@ namespace Infrastructure.Services
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProductService(AppDbContext context)
+        public ProductService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<HttpResponses<ProductResponseDto>> CreateProductAsync(ProductCreateDto dto, CancellationToken cancellationToken)
+        public async Task<HttpResponses<ProductResponseDto>> CreateProductAsync(
+            ProductCreateDto dto,
+            CancellationToken cancellationToken)
         {
-            var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID);
+            var supplier = await _context.Suppliers
+                .FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID, cancellationToken);
+
             if (supplier == null)
             {
-                return HttpResponses<ProductResponseDto>.FailResponse("Supplier doesnot exists.");
+                return HttpResponses<ProductResponseDto>.FailResponse("Supplier does not exist.");
             }
+
+            string imagePath = null;
+            if (dto.ProductImage != null)
+            {
+                var imageSavedResult = await FileHelper.SaveProductImageAsync(dto.ProductImage, cancellationToken);
+                if (!imageSavedResult.Success)
+                {
+                    return HttpResponses<ProductResponseDto>.FailResponse(imageSavedResult.Message);
+                }
+                else
+                {
+                    imagePath = imageSavedResult.Data;
+                }
+            }
+            var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
+            var fullImagePath = imagePath != null ? $"{baseUrl}{imagePath}" : null;
 
             var product = new Product
             {
@@ -30,7 +53,8 @@ namespace Infrastructure.Services
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
                 SupplierID = dto.SupplierID,
-                IsActive = dto.IsActive
+                IsActive = dto.IsActive,
+                ProductImage = fullImagePath
             };
 
             _context.Products.Add(product);
@@ -44,7 +68,8 @@ namespace Infrastructure.Services
                 Price = product.Price,
                 StockQuantity = product.StockQuantity,
                 SupplierID = product.SupplierID,
-                IsActive = product.IsActive
+                IsActive = product.IsActive,
+                ProductImage = product.ProductImage
             };
 
             return HttpResponses<ProductResponseDto>.SuccessResponse(response, "Product created successfully.");
@@ -54,7 +79,12 @@ namespace Infrastructure.Services
         {
             var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken);
             if (product == null) return HttpResponses<string>.FailResponse("Product not found.");
-
+            
+            var productExistsinOrder = await _context.OrderDetails.AnyAsync(o => o.ProductID == id);
+            if (productExistsinOrder)
+            {
+                return HttpResponses<string>.FailResponse("Product exists in order . so deletion is prohibited. ");
+            }
             _context.Products.Remove(product);
             await _context.SaveChangesAsync(cancellationToken);
             return HttpResponses<string>.SuccessResponse(null, "Product deleted successfully.");

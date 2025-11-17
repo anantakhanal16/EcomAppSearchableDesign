@@ -49,21 +49,10 @@ namespace Infrastructure.Jwt
 
                 options.Events = new JwtBearerEvents
                 {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Cookies["accessToken"];
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            context.Token = accessToken;
-                        }
-                        return Task.CompletedTask;
-                    },
-
                     OnTokenValidated = async context =>
                     {
                         var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
-                        var userId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+                        var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                         if (string.IsNullOrEmpty(userId))
                         {
                             context.Fail("Invalid token: missing user ID");
@@ -77,13 +66,10 @@ namespace Infrastructure.Jwt
                             return;
                         }
 
-                        var tokenSecurityStamp = context.Principal.FindFirst("securityStamp")?.Value;
+                        var tokenSecurityStamp = context.Principal?.FindFirst("securityStamp")?.Value;
                         var currentSecurityStamp = await userManager.GetSecurityStampAsync(user);
-
                         if (tokenSecurityStamp != currentSecurityStamp)
-                        {
                             context.Fail("Token is no longer valid due to logout or password reset");
-                        }
                     },
 
                     OnChallenge = context =>
@@ -95,6 +81,8 @@ namespace Infrastructure.Jwt
                         var response = HttpResponses<string>.FailResponse("Unauthorized access", HttpStatusCode.Unauthorized);
                         var json = JsonSerializer.Serialize(response);
                         return context.Response.WriteAsync(json);
+
+                        
                     },
 
                     OnForbidden = context =>

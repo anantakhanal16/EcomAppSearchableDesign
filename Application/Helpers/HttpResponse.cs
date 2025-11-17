@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Application.Helpers
 {
@@ -12,6 +10,7 @@ namespace Application.Helpers
         public bool Success { get; set; }
         public string Message { get; set; }
         public T Data { get; set; }
+        public object Errors { get; set; }
 
         public HttpResponses() { }
 
@@ -23,19 +22,46 @@ namespace Application.Helpers
             StatusCode = statusCode;
         }
 
-        public static HttpResponses<T> SuccessResponse(T data, string message = "Request successful", HttpStatusCode statusCode = HttpStatusCode.OK)
+        public static HttpResponses<T> SuccessResponse(
+            T data,
+            string message = "Request successful",
+            HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            return new HttpResponses<T> { StatusCode = statusCode, Success = true, Message = message, Data = data };
+            return new HttpResponses<T>
+            {
+                StatusCode = statusCode,
+                Success = true,
+                Message = message,
+                Data = data
+            };
         }
 
-        public static HttpResponses<T> FailResponse(string message, HttpStatusCode statusCode = HttpStatusCode.BadRequest)
+        public static HttpResponses<T> FailResponse(
+            string message,
+            object errors = null,
+            HttpStatusCode statusCode = HttpStatusCode.BadRequest)
         {
-            return new HttpResponses<T> { StatusCode = statusCode, Success = false, Message = message, Data = default };
+            return new HttpResponses<T>
+            {
+                StatusCode = statusCode,
+                Success = false,
+                Message = message,
+                Errors = errors,
+                Data = default
+            };
         }
 
-        public static HttpResponses<T> ErrorResponse(string message = "An error occurred", HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
+        public static HttpResponses<T> ErrorResponse(
+            string message = "An error occurred",
+            HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         {
-            return new HttpResponses<T> { StatusCode = statusCode, Success = false, Message = message, Data = default };
+            return new HttpResponses<T>
+            {
+                StatusCode = statusCode,
+                Success = false,
+                Message = message,
+                Data = default
+            };
         }
 
         public async Task ExecuteResultAsync(ActionContext context)

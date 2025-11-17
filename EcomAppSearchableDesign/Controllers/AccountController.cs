@@ -23,6 +23,11 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     public async Task<HttpResponses<UserRegistrationResponseDto>> Register([FromBody] RegisterRequestDto request, CancellationToken cancellationToken)
     {
+
+        if (!ModelState.IsValid)
+        {
+            return ModelState.ToErrorResponse<UserRegistrationResponseDto>();
+        }
         var response = await _identityService.RegisterAsync(request, cancellationToken);
         if (response.Code != "0")
         {
@@ -36,9 +41,10 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     public async Task<HttpResponses<UserLoginResponse>> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
+      
         if (!ModelState.IsValid)
         {
-            return HttpResponses<UserLoginResponse>.FailResponse("Email and password are required");
+            return ModelState.ToErrorResponse<UserLoginResponse>();
         }
 
         var response = await _identityService.LoginAsync(request, cancellationToken);

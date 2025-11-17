@@ -15,6 +15,8 @@ namespace Domain.Entities
         public int StockQuantity { get; set; }
         public int SupplierID { get; set; }
         public bool IsActive { get; set; }
+        public string ProductImage { get; set; }
+
 
         // Navigation property
         public Supplier Supplier { get; set; }

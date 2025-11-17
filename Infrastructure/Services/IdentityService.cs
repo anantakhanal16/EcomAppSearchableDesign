@@ -23,6 +23,9 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
             return ServiceResponseData<UserRegistrationResponseDto>.Failure(errors);
         }
+        var assignedRole = request.role ?? "user";
+
+        var roleResult = await userManager.AddToRoleAsync(user, assignedRole);
 
         return ServiceResponseData<UserRegistrationResponseDto>.Success("Registration successful");
     }
