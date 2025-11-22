@@ -22,13 +22,13 @@ public class ProductController(IProductService productService) : ControllerBase
     }
 
     [HttpGet("get-all-products")]
-    public async Task<HttpResponses<List<ProductResponseDto>>> GetAllProducts(CancellationToken cancellationToken)
+    public async Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProducts([FromQuery]GetAllProductDto getAllProductDto ,CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
-            return ModelState.ToErrorResponse<List<ProductResponseDto>>();
+            return ModelState.ToErrorResponse<PagedResult<ProductResponseDto>>();
         }
-        return await productService.GetAllProductsAsync(cancellationToken);
+        return await productService.GetAllProductsAsync(getAllProductDto,cancellationToken);
     }
 
     [HttpGet("get-product/{id:int}")]
@@ -41,14 +41,14 @@ public class ProductController(IProductService productService) : ControllerBase
         return await productService.GetProductByIdAsync(id, cancellationToken);
     }
 
-    [HttpPut("update-product/{id:int}")]
-    public async Task<HttpResponses<ProductResponseDto>> UpdateProduct(int id, [FromBody] ProductUpdateDto dto, CancellationToken cancellationToken)
+    [HttpPut("update-product")]
+    public async Task<HttpResponses<ProductResponseDto>> UpdateProduct([FromForm] ProductUpdateDto dto, CancellationToken cancellationToken)
     {
-        if (id == 0)
+        if (!ModelState.IsValid)
         {
             return ModelState.ToErrorResponse<ProductResponseDto>();
         }
-        return await productService.UpdateProductAsync(id, dto, cancellationToken);
+        return await productService.UpdateProductAsync( dto, cancellationToken);
     }
 
     [HttpDelete("delete-product/{id:int}")]
@@ -59,5 +59,14 @@ public class ProductController(IProductService productService) : ControllerBase
             return ModelState.ToErrorResponse<string>();
         }
         return await productService.DeleteProductAsync(id, cancellationToken);
+    }
+    [HttpPost("ImportProductData")]
+    public async Task<HttpResponses<string>> ImportProductData(IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file == null || file.Length == 0)
+            return HttpResponses<string>.FailResponse("No file uploaded");
+
+        using var stream = file.OpenReadStream();
+        return await productService.ImportProductData(stream, cancellationToken);
     }
 }

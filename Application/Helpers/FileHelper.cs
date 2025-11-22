@@ -33,5 +33,37 @@ namespace Application.Helpers
 
             return HttpResponses<string>.SuccessResponse($"/product-images/{fileName}.");
         }
+
+        public static async Task<HttpResponses<string>> DeleteProductImageAsync(string imageUrlOrPath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(imageUrlOrPath))
+                    return HttpResponses<string>.FailResponse("Invalid image path.");
+
+                string relativePath = imageUrlOrPath;
+
+                if (imageUrlOrPath.StartsWith("http"))
+                {
+                    var uri = new Uri(imageUrlOrPath);
+                    relativePath = uri.AbsolutePath; 
+                }
+
+                string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                string fullPath = Path.Combine(rootPath, relativePath.TrimStart('/'));
+
+                if (!File.Exists(fullPath))
+                    return HttpResponses<string>.FailResponse("Old image not found.");
+
+                await Task.Run(() => File.Delete(fullPath));
+
+                return HttpResponses<string>.SuccessResponse("Image deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return HttpResponses<string>.FailResponse($"Failed to delete old image. {ex.Message}");
+            }
+        }
+
     }
 }

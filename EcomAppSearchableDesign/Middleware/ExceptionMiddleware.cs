@@ -23,7 +23,16 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            var endpoint = context.GetEndpoint();
+            var endpointName = endpoint?.DisplayName ?? "Unknown Endpoint";
+
+            _logger.LogError(ex,
+                "Unhandled exception at {endpoint} | {method} {url}",
+                endpointName,
+                context.Request.Method,
+                context.Request.Path
+            );
+
             await HandleExceptionAsync(context, ex);
         }
     }

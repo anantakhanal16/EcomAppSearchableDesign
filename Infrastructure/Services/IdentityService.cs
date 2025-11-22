@@ -62,6 +62,7 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
 
         var email = user.FindFirst(ClaimTypes.Email)?.Value;
         var userDetail = await userManager.FindByEmailAsync(email);
+        
         if (userDetail == null)
         {
             return ServiceResponseData<User>.Failure("Failed to get UserDetails");
@@ -70,21 +71,6 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
         return ServiceResponseData<User>.Success("User Details", userDetail);
     }
 
-    public async Task<ServiceResponseData<UserLoginResponse>> GenerateRefreshToken(string token, CancellationToken cancellationToken)
-    {
-        var refreshToken = token;
-        var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken && u.RefreshTokenExpiryTime > DateTime.UtcNow, cancellationToken);
-
-        if (user == null)
-        {
-            return ServiceResponseData<UserLoginResponse>.Failure("Invalid token");
-        }
-
-        var accessToken = await jwtService.GenerateAccessToken(user.Id, user.Email);
-
-        UserLoginResponse userLoginResponse = new UserLoginResponse() { accessToken = accessToken };
-        return ServiceResponseData<UserLoginResponse>.Success("Token refreshed", userLoginResponse);
-    }
 
     public async Task<ServiceResponseData<string>> LogoutAsync(CancellationToken cancellationToken)
     {

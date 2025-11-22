@@ -74,6 +74,8 @@ namespace Infrastructure.Jwt
 
                     OnChallenge = context =>
                     {
+                        ///send mail to admin remaining 
+
                         context.HandleResponse();
                         context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         context.Response.ContentType = "application/json";
@@ -87,6 +89,8 @@ namespace Infrastructure.Jwt
 
                     OnForbidden = context =>
                     {
+                        ///send mail to admin remaining 
+
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                         context.Response.ContentType = "application/json";
 

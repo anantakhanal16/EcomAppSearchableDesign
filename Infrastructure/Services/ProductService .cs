@@ -1,7 +1,13 @@
-﻿using Application.Dtos;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using Application.Dtos;
 using Application.Helpers;
 using Application.Interfaces;
+using ClosedXML.Excel;
 using Domain.Entities;
+using Humanizer;
+using iText.Commons.Actions.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +36,7 @@ namespace Infrastructure.Services
                 return HttpResponses<ProductResponseDto>.FailResponse("Supplier does not exist.");
             }
 
-            string imagePath = null;
+            string imagePath = "";
             if (dto.ProductImage != null)
             {
                 var imageSavedResult = await FileHelper.SaveProductImageAsync(dto.ProductImage, cancellationToken);
@@ -44,7 +50,7 @@ namespace Infrastructure.Services
                 }
             }
             var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
-            var fullImagePath = imagePath != null ? $"{baseUrl}{imagePath}" : null;
+            var imageUrl = imagePath != null ? $"{baseUrl}{imagePath}" : "";
 
             var product = new Product
             {
@@ -54,7 +60,7 @@ namespace Infrastructure.Services
                 StockQuantity = dto.StockQuantity,
                 SupplierID = dto.SupplierID,
                 IsActive = dto.IsActive,
-                ProductImage = fullImagePath
+                ProductImage = imageUrl
             };
 
             _context.Products.Add(product);
@@ -63,13 +69,7 @@ namespace Infrastructure.Services
             var response = new ProductResponseDto
             {
                 ProductID = product.ProductID,
-                ProductName = product.ProductName,
-                Category = product.Category,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                SupplierID = product.SupplierID,
-                IsActive = product.IsActive,
-                ProductImage = product.ProductImage
+
             };
 
             return HttpResponses<ProductResponseDto>.SuccessResponse(response, "Product created successfully.");
@@ -79,7 +79,7 @@ namespace Infrastructure.Services
         {
             var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken);
             if (product == null) return HttpResponses<string>.FailResponse("Product not found.");
-            
+
             var productExistsinOrder = await _context.OrderDetails.AnyAsync(o => o.ProductID == id);
             if (productExistsinOrder)
             {
@@ -90,20 +90,40 @@ namespace Infrastructure.Services
             return HttpResponses<string>.SuccessResponse(null, "Product deleted successfully.");
         }
 
-        public async Task<HttpResponses<List<ProductResponseDto>>> GetAllProductsAsync(CancellationToken cancellationToken)
+        public async Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProductsAsync(
+            GetAllProductDto dto,
+            CancellationToken cancellationToken)
         {
-            var products = await _context.Products.Select(p => new ProductResponseDto
-            {
-                ProductID = p.ProductID,
-                ProductName = p.ProductName,
-                Category = p.Category,
-                Price = p.Price,
-                StockQuantity = p.StockQuantity,
-                SupplierID = p.SupplierID,
-                IsActive = p.IsActive
-            }).ToListAsync(cancellationToken);
+            var query = _context.Products.AsQueryable();
 
-            return HttpResponses<List<ProductResponseDto>>.SuccessResponse(products, "Products retrieved successfully.");
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var products = await query
+                .Skip((dto.PageNumber - 1) * dto.PageSize)
+                .Take(dto.PageSize)
+                .Select(p => new ProductResponseDto
+                {
+                    ProductID = p.ProductID,
+                    ProductName = p.ProductName,
+                    Category = p.Category,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity,
+                    SupplierID = p.SupplierID,
+                    IsActive = p.IsActive,
+                    ProductImage = p.ProductImage
+                })
+                .ToListAsync(cancellationToken);
+
+            var result = new PagedResult<ProductResponseDto>
+            {
+                Items = products,
+                TotalCount = totalCount,
+                PageNumber = dto.PageNumber,
+                PageSize = dto.PageSize
+            };
+
+            return HttpResponses<PagedResult<ProductResponseDto>>
+                .SuccessResponse(result, "Products retrieved successfully.");
         }
 
         public async Task<HttpResponses<ProductResponseDto>> GetProductByIdAsync(int id, CancellationToken cancellationToken)
@@ -119,21 +139,122 @@ namespace Infrastructure.Services
                 Price = product.Price,
                 StockQuantity = product.StockQuantity,
                 SupplierID = product.SupplierID,
-                IsActive = product.IsActive
+                IsActive = product.IsActive,
+                ProductImage = product.ProductImage
             };
 
             return HttpResponses<ProductResponseDto>.SuccessResponse(response, "Product retrieved successfully.");
         }
-
-        public async Task<HttpResponses<ProductResponseDto>> UpdateProductAsync(int id, ProductUpdateDto dto, CancellationToken cancellationToken)
+        public async Task<HttpResponses<string>> ImportProductData(Stream fileStream, CancellationToken cancellationToken)
         {
-            var product = await _context.Products.FindAsync(new object[] { id }, cancellationToken);
-            if (product == null) return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
+            var productsToInsert = new List<Product>();
+            var validationErrors = new List<string>();
+
+            using (var workbook = new XLWorkbook(fileStream))
+            {
+                var worksheet = workbook.Worksheet(1);
+                var rows = worksheet.RowsUsed();
+
+                foreach (var row in rows.Skip(1)) 
+                {
+                    var isValid = TryValidateRow(row);
+                    if (!isValid.Success)
+                    {
+                        validationErrors.Add($"Row {row.RowNumber()}:" + isValid.Message
+                     );
+                        continue;
+                    }
+                    var productDto = new ImportExcelProductDto
+                    {
+                        ProductName = row.Cell(1).GetValue<string>(),
+                        Category = row.Cell(2).GetValue<string>(),
+                        Price = row.Cell(3).GetValue<decimal>(),
+                        StockQuantity = row.Cell(4).GetValue<int>(),
+                        SupplierID = row.Cell(5).GetValue<int>(),
+                        IsActive = row.Cell(6).GetValue<bool>(),
+                        ProductUrl = row.Cell(7).GetValue<string>(),
+                    };
+                    var supplierExists = await _context.Suppliers.AnyAsync(s => s.SupplierID == productDto.SupplierID);
+                    if (!supplierExists)
+                    {
+                        validationErrors.Add($"Row {row.RowNumber()}: " + $"Failed to insert {productDto.ProductName} as supplier doesnot exists");
+                        continue;
+                    }
+                    bool checkProductAlreadyexists = await _context.Products.AnyAsync(p =>
+                                 p.ProductName == productDto.ProductName &&
+                                 p.Category == productDto.Category &&
+                                 p.SupplierID == productDto.SupplierID,
+                                 cancellationToken);
+
+                    if (checkProductAlreadyexists)
+                    {
+                        validationErrors.Add(
+                            $"Row {row.RowNumber()}: Product '{productDto.ProductName}' already exists for same category & supplier."
+                        );
+                        continue;
+                    }
+                    var product = new Product
+                    {
+                        ProductName = productDto.ProductName,
+                        Category = productDto.Category,
+                        Price = productDto.Price,
+                        StockQuantity = productDto.StockQuantity,
+                        SupplierID = productDto.SupplierID,
+                        IsActive = productDto.IsActive,
+                        ProductImage = productDto.ProductUrl
+                    };
+
+                    productsToInsert.Add(product);
+                }
+            }
+
+            if (productsToInsert.Any())
+            {
+                await _context.Products.AddRangeAsync(productsToInsert, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            var errors = "";
+            if (validationErrors.Any())
+            {
+                errors = $" some rows failed to insert :\n{string.Join("\n", validationErrors)}";
+            }
+            return HttpResponses<string>.SuccessResponse($"Successfully imported {productsToInsert.Count} products ," + errors);
+        }
+
+        public async Task<HttpResponses<ProductResponseDto>> UpdateProductAsync(
+            ProductUpdateDto dto,
+            CancellationToken cancellationToken)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductID == dto.Id, cancellationToken);
+            if (product == null)
+                return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
+
             var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID);
             if (supplier == null)
+                return HttpResponses<ProductResponseDto>.FailResponse("Supplier does not exist.");
+
+            string imagePath = product.ProductImage;
+
+            if (dto.ProductImage != null)
             {
-                return HttpResponses<ProductResponseDto>.FailResponse("Supplier doesnot exists.");
+                if (!string.IsNullOrWhiteSpace(product.ProductImage))
+                {
+                    await FileHelper.DeleteProductImageAsync(product.ProductImage);
+                }
+
+                // Save new file
+                var imageSavedResult = await FileHelper.SaveProductImageAsync(dto.ProductImage, cancellationToken);
+                if (!imageSavedResult.Success)
+                {
+                    return HttpResponses<ProductResponseDto>.FailResponse(imageSavedResult.Message);
+                }
+
+                imagePath = imageSavedResult.Data;
             }
+
+            var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
+            var imageUrl = !string.IsNullOrWhiteSpace(imagePath) ? $"{baseUrl}{imagePath}" : "";
 
             product.ProductName = dto.ProductName;
             product.Category = dto.Category;
@@ -141,6 +262,7 @@ namespace Infrastructure.Services
             product.StockQuantity = dto.StockQuantity;
             product.SupplierID = dto.SupplierID;
             product.IsActive = dto.IsActive;
+            product.ProductImage = imageUrl;
 
             _context.Products.Update(product);
             await _context.SaveChangesAsync(cancellationToken);
@@ -153,10 +275,101 @@ namespace Infrastructure.Services
                 Price = product.Price,
                 StockQuantity = product.StockQuantity,
                 SupplierID = product.SupplierID,
-                IsActive = product.IsActive
+                IsActive = product.IsActive,
+                ProductImage = product.ProductImage
             };
 
             return HttpResponses<ProductResponseDto>.SuccessResponse(response, "Product updated successfully.");
         }
+
+        public HttpResponses<string> TryValidateRow(IXLRow row)
+        {
+            string errorMessage;
+
+            var productName = row.Cell(1).GetValue<string>();
+            if (string.IsNullOrWhiteSpace(productName))
+            {
+                errorMessage = $"Row {row.RowNumber()}: Product name is empty.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            var category = row.Cell(2).GetValue<string>();
+            if (string.IsNullOrWhiteSpace(category))
+            {
+                errorMessage = $"Row {row.RowNumber()}: Category is empty.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            var priceStr = row.Cell(3).GetValue<string>();
+            if (!decimal.TryParse(priceStr, out var price) || price <= 0)
+            {
+                errorMessage = $"Row {row.RowNumber()}: Invalid price '{priceStr}'. Price must be greater than 0.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            var qtyStr = row.Cell(4).GetValue<string>();
+            if (!int.TryParse(qtyStr, out var qty) || qty < 0)
+            {
+                errorMessage = $"Row {row.RowNumber()}: Invalid stock qty '{qtyStr}'. Quantity must be ≥ 0.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            var supplierStr = row.Cell(5).GetValue<string>();
+            if (!int.TryParse(supplierStr, out var supplierId) || supplierId <= 0)
+            {
+                errorMessage = $"Row {row.RowNumber()}: Invalid supplier ID '{supplierStr}'. Supplier ID must be > 0.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            var activeStr = row.Cell(6).GetValue<string>();
+            if (!bool.TryParse(activeStr, out _))
+            {
+                errorMessage = $"Row {row.RowNumber()}: Invalid active flag '{activeStr}'. Must be TRUE or FALSE.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            var urlStr = row.Cell(7).GetValue<string>();
+            if (string.IsNullOrWhiteSpace(urlStr))
+            {
+                errorMessage = $"Row {row.RowNumber()}: Product image URL is empty.";
+                return new HttpResponses<string>()
+                {
+                    Success = false,
+                    Message = errorMessage
+                };
+            }
+
+            return new HttpResponses<string>()
+            {
+                Success = true,
+                Message = "Validation successful"
+            };
+        }
+
+
     }
 }

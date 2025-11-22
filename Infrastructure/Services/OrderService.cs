@@ -104,21 +104,21 @@ namespace Infrastructure.Services
         {
             var query = _context.Orders.Include(o => o.OrderDetails).ThenInclude(od => od.Product).AsQueryable();
 
-            // if (!string.IsNullOrWhiteSpace(dto.Search))
-            // {
-            //     var s = dto.Search.ToLower();
-            //     query = query.Where(o => o.CustomerName.ToLower().Contains(s) || o.CustomerEmail.ToLower().Contains(s));
-            // }
+            if (!string.IsNullOrWhiteSpace(dto.Search))
+            {
+                var s = dto.Search.ToLower();
+                query = query.Where(o => o.CustomerName.ToLower().Contains(s) || o.CustomerEmail.ToLower().Contains(s));
+            }
+
+            if (!string.IsNullOrEmpty(dto.Status)) query = query.Where(o => o.OrderStatus == dto.Status);
+
+            if (dto.StartDate.HasValue) query = query.Where(o => o.OrderDate >= dto.StartDate.Value);
+
+            if (dto.EndDate.HasValue) query = query.Where(o => o.OrderDate <= dto.EndDate.Value);
+
+            var totalCount = await query.CountAsync(cancellationToken);
             //
-            // if (!string.IsNullOrEmpty(dto.Status)) query = query.Where(o => o.OrderStatus == dto.Status);
-            //
-            // if (dto.StartDate.HasValue) query = query.Where(o => o.OrderDate >= dto.StartDate.Value);
-            //
-            // if (dto.EndDate.HasValue) query = query.Where(o => o.OrderDate <= dto.EndDate.Value);
-            //
-             var totalCount = await query.CountAsync(cancellationToken);
-            //
-             var orders = await query.OrderByDescending(o => o.OrderDate).Skip((dto.Page - 1) * dto.PageSize).Take(dto.PageSize).ToListAsync(cancellationToken);
+             var orders = await query.OrderByDescending(o => o.OrderDate).Skip((dto.PageNumber - 1) * dto.PageSize).Take(dto.PageSize).ToListAsync(cancellationToken);
              if (orders.Count == 0)
              {
                  return HttpResponses<PagedResult<OrderResponseDto>>.SuccessResponse(null, "No orders found.");
@@ -135,7 +135,7 @@ namespace Infrastructure.Services
             {
                 Items = orderList,
                 TotalCount = totalCount,
-                Page = dto.Page,
+                 PageNumber = dto.PageNumber,
                 PageSize = dto.PageSize
             };
 

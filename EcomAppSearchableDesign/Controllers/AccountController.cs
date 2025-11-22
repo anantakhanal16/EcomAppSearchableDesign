@@ -68,25 +68,6 @@ public class AccountController : ControllerBase
         return HttpResponses<User>.SuccessResponse(userDetails.Data, userDetails.Message);
     }
 
-    [HttpPost("generaterefreshtoken")]
-    [AllowAnonymous]
-    public async Task<HttpResponses<UserLoginResponse>> RefreshToken(CancellationToken cancellationToken)
-    {
-        var refreshToken = Request.Cookies["refreshToken"];
-        if (string.IsNullOrEmpty(refreshToken))
-        {
-            return HttpResponses<UserLoginResponse>.FailResponse("Failed to generate refresh token.");
-        }
-
-        var response = await _identityService.GenerateRefreshToken(refreshToken, cancellationToken);
-        if (response.Code != "0")
-        {
-            return HttpResponses<UserLoginResponse>.FailResponse(response.Message);
-        }
-
-        return HttpResponses<UserLoginResponse>.SuccessResponse(response.Data, response.Message);
-    }
-
     [HttpPost("logout")]
     public async Task<HttpResponses<string>> Logout(CancellationToken cancellationToken)
     {
