@@ -10,8 +10,7 @@ namespace Infrastructure.Data.SeedData
     {
         public static async Task SeedAsync(RoleManager<IdentityRole> roleManager)
         {
-            if (await roleManager.Roles.AnyAsync())
-                return;
+            if (await roleManager.Roles.AnyAsync()) return;
 
             var roles = new[] { "Admin", "User" };
 

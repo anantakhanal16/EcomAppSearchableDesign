@@ -24,9 +24,8 @@ public class JwtTokenService(IOptions<JwtSettings> jwtOptions, UserManager<User>
         var securityStamp = await userManager.GetSecurityStampAsync(user);
         var roles = await userManager.GetRolesAsync(user);
 
-        var claims =new  List<Claim>()
+        var claims = new List<Claim>()
         {
-
             new Claim(ClaimTypes.NameIdentifier, userId),
             new Claim(ClaimTypes.Email, email),
             new Claim("securityStamp", securityStamp),
@@ -38,6 +37,7 @@ public class JwtTokenService(IOptions<JwtSettings> jwtOptions, UserManager<User>
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

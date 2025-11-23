@@ -23,6 +23,7 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
             return ServiceResponseData<UserRegistrationResponseDto>.Failure(errors);
         }
+
         var assignedRole = request.role ?? "user";
 
         var roleResult = await userManager.AddToRoleAsync(user, assignedRole);
@@ -47,28 +48,42 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
         return serviceResponse;
     }
 
-    public async Task<ServiceResponseData<User>> GetUserDetails(CancellationToken cancellationToken)
+    public async Task<ServiceResponseData<UserDetailDto>> GetUserDetails(CancellationToken cancellationToken)
     {
-        var user = httpContextAccessor.HttpContext?.User;
-        if (user == null)
-        {
-            return new ServiceResponseData<User> { Code = "1", Message = "User not found", };
-        }
+        var principalUser = httpContextAccessor.HttpContext?.User;
 
-        if (!user.Identity.IsAuthenticated)
-        {
-            return new ServiceResponseData<User> { Code = "1", Message = "User not authenticated" };
-        }
+        if (principalUser == null) return ServiceResponseData<UserDetailDto>.Failure("User not found");
 
-        var email = user.FindFirst(ClaimTypes.Email)?.Value;
-        var userDetail = await userManager.FindByEmailAsync(email);
-        
-        if (userDetail == null)
-        {
-            return ServiceResponseData<User>.Failure("Failed to get UserDetails");
-        }
+        if (!principalUser.Identity.IsAuthenticated) return ServiceResponseData<UserDetailDto>.Failure("User not authenticated");
 
-        return ServiceResponseData<User>.Success("User Details", userDetail);
+        var email = principalUser.FindFirst(ClaimTypes.Email)?.Value;
+
+        if (string.IsNullOrWhiteSpace(email)) return ServiceResponseData<UserDetailDto>.Failure("Email claim missing in token");
+
+        var user = await userManager.FindByEmailAsync(email);
+
+        if (user == null) return ServiceResponseData<UserDetailDto>.Failure("User not found in database");
+
+        var roles = await userManager.GetRolesAsync(user);
+        var userType = roles.FirstOrDefault() ?? "User";
+
+        var dto = new UserDetailDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            NormalizedUserName = user.NormalizedUserName,
+            Email = user.Email,
+            NormalizedEmail = user.NormalizedEmail,
+            EmailConfirmed = user.EmailConfirmed,
+            PhoneNumber = user.PhoneNumber,
+            PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+            TwoFactorEnabled = user.TwoFactorEnabled,
+            LockoutEnabled = user.LockoutEnabled,
+            AccessFailedCount = user.AccessFailedCount,
+            UserType = userType
+        };
+
+        return ServiceResponseData<UserDetailDto>.Success("User detail fetched", dto);
     }
 
 
@@ -86,8 +101,6 @@ public class IdentityService(UserManager<User> userManager, IJwtTokenService jwt
 
         var user = await userManager.FindByEmailAsync(email);
         if (user == null) return ServiceResponseData<string>.Failure("User not found");
-
-
         user.RefreshToken = null;
         user.RefreshTokenExpiryTime = null;
 

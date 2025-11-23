@@ -32,8 +32,7 @@ namespace Infrastructure.Jwt
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
+            }).AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -68,14 +67,14 @@ namespace Infrastructure.Jwt
 
                         var tokenSecurityStamp = context.Principal?.FindFirst("securityStamp")?.Value;
                         var currentSecurityStamp = await userManager.GetSecurityStampAsync(user);
-                        if (tokenSecurityStamp != currentSecurityStamp)
-                            context.Fail("Token is no longer valid due to logout or password reset");
+                        if (tokenSecurityStamp != currentSecurityStamp) context.Fail("Token is no longer valid due to logout or password reset");
                     },
 
                     OnChallenge = context =>
                     {
-                        ///send mail to admin remaining 
+                        ///send mail to admin remaining  mail setup need to be done i have not done due to time constrains
 
+                        //send mail to admin psudocode
                         context.HandleResponse();
                         context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                         context.Response.ContentType = "application/json";
@@ -83,13 +82,12 @@ namespace Infrastructure.Jwt
                         var response = HttpResponses<string>.FailResponse("Unauthorized access", HttpStatusCode.Unauthorized);
                         var json = JsonSerializer.Serialize(response);
                         return context.Response.WriteAsync(json);
-
-                        
                     },
 
                     OnForbidden = context =>
                     {
                         ///send mail to admin remaining 
+                        //send mail to admin psudocode
 
                         context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
                         context.Response.ContentType = "application/json";

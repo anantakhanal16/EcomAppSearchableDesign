@@ -24,12 +24,9 @@ namespace Infrastructure.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<HttpResponses<ProductResponseDto>> CreateProductAsync(
-            ProductCreateDto dto,
-            CancellationToken cancellationToken)
+        public async Task<HttpResponses<ProductResponseDto>> CreateProductAsync(ProductCreateDto dto, CancellationToken cancellationToken)
         {
-            var supplier = await _context.Suppliers
-                .FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID, cancellationToken);
+            var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID, cancellationToken);
 
             if (supplier == null)
             {
@@ -49,6 +46,7 @@ namespace Infrastructure.Services
                     imagePath = imageSavedResult.Data;
                 }
             }
+
             var baseUrl = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}";
             var imageUrl = imagePath != null ? $"{baseUrl}{imagePath}" : "";
 
@@ -69,7 +67,6 @@ namespace Infrastructure.Services
             var response = new ProductResponseDto
             {
                 ProductID = product.ProductID,
-
             };
 
             return HttpResponses<ProductResponseDto>.SuccessResponse(response, "Product created successfully.");
@@ -85,34 +82,29 @@ namespace Infrastructure.Services
             {
                 return HttpResponses<string>.FailResponse("Product exists in order . so deletion is prohibited. ");
             }
+
             _context.Products.Remove(product);
             await _context.SaveChangesAsync(cancellationToken);
             return HttpResponses<string>.SuccessResponse(null, "Product deleted successfully.");
         }
 
-        public async Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProductsAsync(
-            GetAllProductDto dto,
-            CancellationToken cancellationToken)
+        public async Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProductsAsync(GetAllProductDto dto, CancellationToken cancellationToken)
         {
             var query = _context.Products.AsQueryable();
 
             var totalCount = await query.CountAsync(cancellationToken);
 
-            var products = await query
-                .Skip((dto.PageNumber - 1) * dto.PageSize)
-                .Take(dto.PageSize)
-                .Select(p => new ProductResponseDto
-                {
-                    ProductID = p.ProductID,
-                    ProductName = p.ProductName,
-                    Category = p.Category,
-                    Price = p.Price,
-                    StockQuantity = p.StockQuantity,
-                    SupplierID = p.SupplierID,
-                    IsActive = p.IsActive,
-                    ProductImage = p.ProductImage
-                })
-                .ToListAsync(cancellationToken);
+            var products = await query.Skip((dto.PageNumber - 1) * dto.PageSize).Take(dto.PageSize).Select(p => new ProductResponseDto
+            {
+                ProductID = p.ProductID,
+                ProductName = p.ProductName,
+                Category = p.Category,
+                Price = p.Price,
+                StockQuantity = p.StockQuantity,
+                SupplierID = p.SupplierID,
+                IsActive = p.IsActive,
+                ProductImage = p.ProductImage
+            }).ToListAsync(cancellationToken);
 
             var result = new PagedResult<ProductResponseDto>
             {
@@ -122,8 +114,7 @@ namespace Infrastructure.Services
                 PageSize = dto.PageSize
             };
 
-            return HttpResponses<PagedResult<ProductResponseDto>>
-                .SuccessResponse(result, "Products retrieved successfully.");
+            return HttpResponses<PagedResult<ProductResponseDto>>.SuccessResponse(result, "Products retrieved successfully.");
         }
 
         public async Task<HttpResponses<ProductResponseDto>> GetProductByIdAsync(int id, CancellationToken cancellationToken)
@@ -145,6 +136,7 @@ namespace Infrastructure.Services
 
             return HttpResponses<ProductResponseDto>.SuccessResponse(response, "Product retrieved successfully.");
         }
+
         public async Task<HttpResponses<string>> ImportProductData(Stream fileStream, CancellationToken cancellationToken)
         {
             var productsToInsert = new List<Product>();
@@ -155,15 +147,15 @@ namespace Infrastructure.Services
                 var worksheet = workbook.Worksheet(1);
                 var rows = worksheet.RowsUsed();
 
-                foreach (var row in rows.Skip(1)) 
+                foreach (var row in rows.Skip(1))
                 {
                     var isValid = TryValidateRow(row);
                     if (!isValid.Success)
                     {
-                        validationErrors.Add($"Row {row.RowNumber()}:" + isValid.Message
-                     );
+                        validationErrors.Add($"Row {row.RowNumber()}:" + isValid.Message);
                         continue;
                     }
+
                     var productDto = new ImportExcelProductDto
                     {
                         ProductName = row.Cell(1).GetValue<string>(),
@@ -180,19 +172,15 @@ namespace Infrastructure.Services
                         validationErrors.Add($"Row {row.RowNumber()}: " + $"Failed to insert {productDto.ProductName} as supplier doesnot exists");
                         continue;
                     }
-                    bool checkProductAlreadyexists = await _context.Products.AnyAsync(p =>
-                                 p.ProductName == productDto.ProductName &&
-                                 p.Category == productDto.Category &&
-                                 p.SupplierID == productDto.SupplierID,
-                                 cancellationToken);
+
+                    bool checkProductAlreadyexists = await _context.Products.AnyAsync(p => p.ProductName == productDto.ProductName && p.Category == productDto.Category && p.SupplierID == productDto.SupplierID, cancellationToken);
 
                     if (checkProductAlreadyexists)
                     {
-                        validationErrors.Add(
-                            $"Row {row.RowNumber()}: Product '{productDto.ProductName}' already exists for same category & supplier."
-                        );
+                        validationErrors.Add($"Row {row.RowNumber()}: Product '{productDto.ProductName}' already exists for same category & supplier.");
                         continue;
                     }
+
                     var product = new Product
                     {
                         ProductName = productDto.ProductName,
@@ -219,20 +207,17 @@ namespace Infrastructure.Services
             {
                 errors = $" some rows failed to insert :\n{string.Join("\n", validationErrors)}";
             }
+
             return HttpResponses<string>.SuccessResponse($"Successfully imported {productsToInsert.Count} products ," + errors);
         }
 
-        public async Task<HttpResponses<ProductResponseDto>> UpdateProductAsync(
-            ProductUpdateDto dto,
-            CancellationToken cancellationToken)
+        public async Task<HttpResponses<ProductResponseDto>> UpdateProductAsync(ProductUpdateDto dto, CancellationToken cancellationToken)
         {
             var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductID == dto.Id, cancellationToken);
-            if (product == null)
-                return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
+            if (product == null) return HttpResponses<ProductResponseDto>.FailResponse("Product not found.");
 
             var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierID == dto.SupplierID);
-            if (supplier == null)
-                return HttpResponses<ProductResponseDto>.FailResponse("Supplier does not exist.");
+            if (supplier == null) return HttpResponses<ProductResponseDto>.FailResponse("Supplier does not exist.");
 
             string imagePath = product.ProductImage;
 
@@ -369,7 +354,5 @@ namespace Infrastructure.Services
                 Message = "Validation successful"
             };
         }
-
-
     }
 }

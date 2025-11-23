@@ -13,8 +13,6 @@ namespace Application.Interfaces
         Task<HttpResponses<string>> DeleteProductAsync(int id, CancellationToken cancellationToken);
         Task<HttpResponses<ProductResponseDto>> GetProductByIdAsync(int id, CancellationToken cancellationToken);
         Task<HttpResponses<string>> ImportProductData(Stream fileStream, CancellationToken cancellationToken);
-        Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProductsAsync(
-           GetAllProductDto dto,
-           CancellationToken cancellationToken);
+        Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProductsAsync(GetAllProductDto dto, CancellationToken cancellationToken);
     }
 }

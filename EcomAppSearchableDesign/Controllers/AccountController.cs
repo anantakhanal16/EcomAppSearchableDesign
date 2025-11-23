@@ -23,11 +23,11 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     public async Task<HttpResponses<UserRegistrationResponseDto>> Register([FromBody] RegisterRequestDto request, CancellationToken cancellationToken)
     {
-
         if (!ModelState.IsValid)
         {
             return ModelState.ToErrorResponse<UserRegistrationResponseDto>();
         }
+
         var response = await _identityService.RegisterAsync(request, cancellationToken);
         if (response.Code != "0")
         {
@@ -41,7 +41,6 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     public async Task<HttpResponses<UserLoginResponse>> Login([FromBody] LoginRequestDto request, CancellationToken cancellationToken)
     {
-      
         if (!ModelState.IsValid)
         {
             return ModelState.ToErrorResponse<UserLoginResponse>();
@@ -57,15 +56,15 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("getUserDetails")]
-    public async Task<HttpResponses<User>> GetUserDetails(CancellationToken cancellationToken)
+    public async Task<HttpResponses<UserDetailDto>> GetUserDetails(CancellationToken cancellationToken)
     {
         var userDetails = await _identityService.GetUserDetails(cancellationToken);
         if (userDetails.Code != "0")
         {
-            return HttpResponses<User>.FailResponse(userDetails.Message);
+            return HttpResponses<UserDetailDto>.FailResponse(userDetails.Message);
         }
 
-        return HttpResponses<User>.SuccessResponse(userDetails.Data, userDetails.Message);
+        return HttpResponses<UserDetailDto>.SuccessResponse(userDetails.Data, userDetails.Message);
     }
 
     [HttpPost("logout")]

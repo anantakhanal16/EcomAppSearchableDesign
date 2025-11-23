@@ -1,7 +1,10 @@
 ﻿using System.Data;
+using System.Security.Claims;
 using Application.Dtos;
 using Application.Helpers;
 using Application.Interfaces;
+using Core.Entities;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Domain.Entities;
 using Domain.Enum;
 using Microsoft.Data.SqlClient;
@@ -20,12 +23,11 @@ namespace Infrastructure.Services
             _utlityServices = utlityServices;
         }
 
-        public async Task<HttpResponses<OrderResponseDto>> CreateOrderAsync(OrderCreateDto dto, CancellationToken cancellationToken)
+        public async Task<HttpResponses<OrderResponseDto>> CreateOrderAsync(OrderCreateDto dto, string userId, CancellationToken cancellationToken)
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
             try
             {
-                //  lock timeout to 30 seconds
                 await _context.Database.ExecuteSqlRawAsync("SET LOCK_TIMEOUT 10000", cancellationToken);
 
                 var productIds = dto.OrderDetails.Select(d => d.ProductID).Distinct().OrderBy(id => id).ToList();
@@ -43,7 +45,6 @@ namespace Infrastructure.Services
                     return HttpResponses<OrderResponseDto>.FailResponse($"Products not found: {string.Join(", ", missingProductIds)}");
                 }
 
-                // validations and stock update
                 var orderDetails = new List<OrderDetails>();
 
                 foreach (var item in dto.OrderDetails)
@@ -72,7 +73,8 @@ namespace Infrastructure.Services
                     CustomerEmail = dto.CustomerEmail,
                     TotalAmount = orderDetails.Sum(od => od.SubTotal),
                     OrderStatus = OrderStatus.Pending.ToString(),
-                    OrderDetails = orderDetails
+                    OrderDetails = orderDetails,
+                    CreatedBy = userId.ToString()
                 };
 
                 _context.Orders.Add(order);
@@ -90,9 +92,9 @@ namespace Infrastructure.Services
             }
         }
 
-        public async Task<HttpResponses<OrderResponseDto>> GetOrderByIdAsync(int orderId, CancellationToken cancellationToken)
+        public async Task<HttpResponses<OrderResponseDto>> GetOrderByIdAsync(int orderId, string userId, CancellationToken cancellationToken)
         {
-            var order = await _context.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderID == orderId, cancellationToken);
+            var order = await _context.Orders.Include(o => o.OrderDetails).ThenInclude(od => od.Product).Where(o => o.CreatedBy == userId).FirstOrDefaultAsync(o => o.OrderID == orderId, cancellationToken);
 
             if (order == null) return HttpResponses<OrderResponseDto>.FailResponse("Order not found.");
 
@@ -117,56 +119,125 @@ namespace Infrastructure.Services
             if (dto.EndDate.HasValue) query = query.Where(o => o.OrderDate <= dto.EndDate.Value);
 
             var totalCount = await query.CountAsync(cancellationToken);
-            //
-             var orders = await query.OrderByDescending(o => o.OrderDate).Skip((dto.PageNumber - 1) * dto.PageSize).Take(dto.PageSize).ToListAsync(cancellationToken);
-             if (orders.Count == 0)
-             {
-                 return HttpResponses<PagedResult<OrderResponseDto>>.SuccessResponse(null, "No orders found.");
-             }
 
-             List<OrderResponseDto> orderList = new List<OrderResponseDto>();
-             foreach (var order in orders)
-             {
-                 var mappedOrder = MapToDto(order);
-                 orderList.Add(mappedOrder);
-             }
-             
-             var result = new PagedResult<OrderResponseDto>
+            var orders = await query.OrderByDescending(o => o.OrderDate).Skip((dto.PageNumber - 1) * dto.PageSize).Take(dto.PageSize).ToListAsync(cancellationToken);
+            if (orders.Count == 0)
+            {
+                return HttpResponses<PagedResult<OrderResponseDto>>.SuccessResponse(null, "No orders found.");
+            }
+
+            List<OrderResponseDto> orderList = new List<OrderResponseDto>();
+            foreach (var order in orders)
+            {
+                var mappedOrder = MapToDto(order);
+                orderList.Add(mappedOrder);
+            }
+
+            var result = new PagedResult<OrderResponseDto>
             {
                 Items = orderList,
                 TotalCount = totalCount,
-                 PageNumber = dto.PageNumber,
+                PageNumber = dto.PageNumber,
                 PageSize = dto.PageSize
             };
 
             return HttpResponses<PagedResult<OrderResponseDto>>.SuccessResponse(result, "Orders retrieved successfully.");
         }
 
-        public async Task<HttpResponses<OrderResponseDto>> UpdateOrderAsync(int orderId, OrderUpdateDto dto, CancellationToken cancellationToken)
+        public async Task<HttpResponses<PagedResult<OrderResponseDto>>> GetUserOrder(GetOrdersDto dto, string userId, CancellationToken cancellationToken)
         {
-            var order = await _context.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderID == orderId, cancellationToken);
+            var query = _context.Orders.Include(o => o.OrderDetails).ThenInclude(od => od.Product).Where(o => o.CreatedBy == userId.ToString()).AsQueryable();
 
-            if (order == null) return HttpResponses<OrderResponseDto>.FailResponse("Order not found.");
-
-            order.OrderDate = dto.OrderDate;
-            order.CustomerName = dto.CustomerName;
-            order.CustomerEmail = dto.CustomerEmail;
-            order.TotalAmount = dto.TotalAmount;
-            order.OrderStatus = dto.OrderStatus;
-
-            _context.OrderDetails.RemoveRange(order.OrderDetails);
-
-            order.OrderDetails = dto.OrderDetails.Select(d => new OrderDetails
+            if (!string.IsNullOrWhiteSpace(dto.Search))
             {
-                ProductID = d.ProductID,
-                Quantity = d.Quantity,
-                SubTotal = d.SubTotal
-            }).ToList();
+                var s = dto.Search.ToLower();
+                query = query.Where(o => o.CustomerName.ToLower().Contains(s) || o.CustomerEmail.ToLower().Contains(s));
+            }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            if (!string.IsNullOrEmpty(dto.Status)) query = query.Where(o => o.OrderStatus == dto.Status);
 
-            var mapped = MapToDto(order);
-            return HttpResponses<OrderResponseDto>.SuccessResponse(mapped, "Order updated successfully.");
+            if (dto.StartDate.HasValue) query = query.Where(o => o.OrderDate >= dto.StartDate.Value);
+
+            if (dto.EndDate.HasValue) query = query.Where(o => o.OrderDate <= dto.EndDate.Value);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var orders = await query.OrderByDescending(o => o.OrderDate).Skip((dto.PageNumber - 1) * dto.PageSize).Take(dto.PageSize).ToListAsync(cancellationToken);
+            if (orders.Count == 0)
+            {
+                return HttpResponses<PagedResult<OrderResponseDto>>.SuccessResponse(null, "No orders found.");
+            }
+
+            List<OrderResponseDto> orderList = new List<OrderResponseDto>();
+            foreach (var order in orders)
+            {
+                var mappedOrder = MapToDto(order);
+                orderList.Add(mappedOrder);
+            }
+
+            var result = new PagedResult<OrderResponseDto>
+            {
+                Items = orderList,
+                TotalCount = totalCount,
+                PageNumber = dto.PageNumber,
+                PageSize = dto.PageSize
+            };
+
+            return HttpResponses<PagedResult<OrderResponseDto>>.SuccessResponse(result, "Orders retrieved successfully.");
+        }
+
+        public async Task<HttpResponses<OrderResponseDto>> UpdateOrderAsync(int orderId, OrderUpdateDto dto, string userId, CancellationToken cancellationToken)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                var order = await _context.Orders.FromSqlRaw(@"SELECT * FROM Orders WITH (ROWLOCK, UPDLOCK) 
+          WHERE OrderID = {0} AND CreatedBy = {1}", orderId, userId).Include(o => o.OrderDetails).FirstOrDefaultAsync(cancellationToken);
+
+                if (order == null) return HttpResponses<OrderResponseDto>.FailResponse("Order not found.");
+
+                _context.OrderDetails.RemoveRange(order.OrderDetails);
+
+                var newOrderDetails = new List<OrderDetails>();
+                decimal totalAmount = 0;
+
+                foreach (var item in dto.OrderDetails)
+                {
+                    var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductID == item.ProductID, cancellationToken);
+
+                    if (product == null) return HttpResponses<OrderResponseDto>.FailResponse($"Product not found: {item.ProductID}");
+
+                    var subTotal = product.Price * item.Quantity;
+                    totalAmount += subTotal;
+
+                    newOrderDetails.Add(new OrderDetails
+                    {
+                        OrderID = orderId,
+                        ProductID = item.ProductID,
+                        Quantity = item.Quantity,
+                        SubTotal = subTotal
+                    });
+                }
+
+                order.OrderDate = dto.OrderDate;
+                order.CustomerName = dto.CustomerName;
+                order.CustomerEmail = dto.CustomerEmail;
+                order.OrderStatus = dto.OrderStatus;
+                order.TotalAmount = totalAmount;
+                order.OrderDetails = newOrderDetails;
+
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                var mapped = MapToDto(order);
+                return HttpResponses<OrderResponseDto>.SuccessResponse(mapped, "Order updated successfully.");
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return HttpResponses<OrderResponseDto>.FailResponse("Failed to update order. Transaction rolled back.");
+            }
         }
 
         public async Task<byte[]> ExportOrderData(GetOrdersDto dto, CancellationToken cancellationToken)
@@ -185,9 +256,9 @@ namespace Infrastructure.Services
             return utilityResult;
         }
 
-        public async Task<HttpResponses<string>> DeleteOrderAsync(int orderId, CancellationToken cancellationToken)
+        public async Task<HttpResponses<string>> DeleteOrderAsync(int orderId, string userId, CancellationToken cancellationToken)
         {
-            var order = await _context.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderID == orderId, cancellationToken);
+            var order = await _context.Orders.Include(o => o.OrderDetails).Where(o => o.CreatedBy == userId.ToString()).FirstOrDefaultAsync(o => o.OrderID == orderId, cancellationToken);
 
             if (order == null) return HttpResponses<string>.FailResponse("Order not found.");
 
@@ -216,7 +287,7 @@ namespace Infrastructure.Services
                     Quantity = d.Quantity,
                     SubTotal = d.SubTotal,
                     ProductPrice = d.Product.Price,
-                    ProductName= d.Product.ProductName
+                    ProductName = d.Product.ProductName
                 }).ToList()
             };
         }
@@ -242,6 +313,7 @@ namespace Infrastructure.Services
 
             return HttpResponses<OrderResponseDto>.FailResponse($"Failed to create order: {ex.Message}");
         }
+
         private List<ExportOrderReportDto> CleanAndSanitizeData(List<OrderResponseDto> dataItems)
         {
             var reportData = new List<ExportOrderReportDto>();
@@ -261,7 +333,7 @@ namespace Infrastructure.Services
 
                         OrderDetailID = detail.OrderDetailID,
                         ProductID = detail.ProductID,
-                        ProductName = detail.ProductName ?? "",  
+                        ProductName = detail.ProductName ?? "",
                         Quantity = detail.Quantity,
                         ProductPrice = detail.ProductPrice,
                         SubTotal = detail.SubTotal
@@ -271,6 +343,5 @@ namespace Infrastructure.Services
 
             return reportData;
         }
-
     }
 }

@@ -14,6 +14,7 @@ namespace Domain.Entities
         public string CustomerEmail { get; set; }
         public decimal TotalAmount { get; set; }
         public string OrderStatus { get; set; }
+        public string CreatedBy { get; set; }
         public ICollection<OrderDetails> OrderDetails { get; set; }
     }
 }
