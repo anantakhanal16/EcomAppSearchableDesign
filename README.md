@@ -1,70 +1,61 @@
-EcomAppSearchableDesign – Step-by-Step Setup Guide
+# EcomAppSearchableDesign Setup and Usage Guide
 
-Tech Stack: .NET 10, Clean Architecture, SQL Server, EF Core
+## 1. Open Solution
+Open the `EcomAppSearchableDesign.sln` file in Visual Studio.
 
-Step 1: Open the Solution
-
-Open your solution in Visual Studio:
-
-File → Open → Project/Solution → EcomAppSearchableDesign.sln
-
-Step 2: Install EF Core CLI Tool
-
-Install the Entity Framework Core global tool to run migrations:
-
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef
+## 2. Install EF Core Tools
+To run migrations, first install the Entity Framework Core CLI tool:
 
 
-This allows you to run dotnet ef commands from anywhere.
+dotnet tool install --global dotnet-ef
+3. Run Migrations
+Create the initial migration:
 
-Step 3: Create Initial Migration
+bash
+Copy code
+dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+Update the database:
 
-Run this command to generate the initial migration for the database tables:
+bash
+Copy code
+dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
+This will create the necessary tables and the database.
 
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+Example:
 
+text
+Copy code
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef   # Step 1: Install EF Core CLI
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign  # Step 2: Add migration
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign  # Step 3: Update database
+4. Using API Endpoints
+After migrations are done, you can start using the API endpoints.
 
---project Infrastructure → EF Core context is in the Infrastructure project
+4.1 Register Users
+You need to register users with roles. There are Admin and User roles.
 
---startup-project EcomAppSearchableDesign → Startup project with DI and configurations
+User Role Example:
 
-Step 4: Update Database
-
-Apply the migration to create the database and tables:
-
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
-
-
-✅ After this, your database and tables are ready.
-
-Step 5: Register Users
-
-Use your API endpoints to register users. Examples:
-
-User Role:
-
-POST /api/auth/register
+json
+Copy code
 {
   "email": "user1@example.com",
   "password": "Test@123",
   "fullName": "someuser",
   "role": "User"
 }
+Admin Role Example:
 
-
-Admin Role:
-
-POST /api/auth/register
+json
+Copy code
 {
   "email": "Admin@example.com",
   "password": "Admin@123",
   "fullName": "adminUser",
   "role": "Admin"
 }
-
-Step 6: Role-Based Actions
-
-Admin User can:
+4.2 Admin Capabilities
+After registering as an Admin, you can:
 
 Add products
 
@@ -72,24 +63,7 @@ Create orders
 
 Export data to PDF and Excel
 
-Regular User can:
+4.3 Role-Based Access
+Some API endpoints are restricted to Admin users.
 
-Access only user-level endpoints
-
-Step 7: Start Using API
-
-After registration, you can now:
-
-Log in with JWT authentication
-
-Perform CRUD operations for products and orders
-
-Access export features (PDF/Excel) as admin
-
-✅ This workflow follows Clean Architecture:
-
-Infrastructure → Database & EF Core
-
-Application → Business logic & CQRS
-
-API → Controllers & endpoints
+Other endpoints are accessible to User roles.
