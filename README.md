@@ -11,7 +11,6 @@ Open the `EcomAppSearchableDesign.sln` file in Visual Studio.
 
 To run migrations, first install the Entity Framework Core CLI tool:
 
-
 dotnet tool install --global dotnet-ef
 
 3. Run Migrations
@@ -23,7 +22,8 @@ dotnet ef database update --project Infrastructure --startup-project EcomAppSear
 
 
 This will create the necessary tables and the database.
-Example:
+
+Sample Example:
 
   # Step 1: Install EF Core CLI
 C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef 
@@ -34,16 +34,13 @@ C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add Ini
  # Step 3: Update database
 C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign 
 
-4. Using API Endpoints
+ Using API Endpoints
 After migrations are done, you can start using the API endpoints.
 
 4.1 Register Users
 You need to register users with roles. There are Admin and User roles.
 
 User Role Example:
-
-json
-Copy code
 {
   "email": "user1@example.com",
   "password": "Test@123",
