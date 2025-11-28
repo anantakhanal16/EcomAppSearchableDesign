@@ -1,34 +1,39 @@
 # EcomAppSearchableDesign Setup and Usage Guide
 
 ## 1. Open Solution
-clone this project open cmd and git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
+first clone this project
+
+open cmd and git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
+
 Open the `EcomAppSearchableDesign.sln` file in Visual Studio.
 
 ## 2. Install EF Core Tools
+
 To run migrations, first install the Entity Framework Core CLI tool:
 
 
 dotnet tool install --global dotnet-ef
+
 3. Run Migrations
 Create the initial migration:
-
-bash
-Copy code
 dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+
 Update the database:
-
-bash
-Copy code
 dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
-This will create the necessary tables and the database.
 
+
+This will create the necessary tables and the database.
 Example:
 
-text
-Copy code
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef   # Step 1: Install EF Core CLI
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign  # Step 2: Add migration
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign  # Step 3: Update database
+  # Step 1: Install EF Core CLI
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef 
+
+# Step 2: Add migration
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign  
+
+ # Step 3: Update database
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign 
+
 4. Using API Endpoints
 After migrations are done, you can start using the API endpoints.
 
