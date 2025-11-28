@@ -1,6 +1,7 @@
 # EcomAppSearchableDesign Setup and Usage Guide
 
 ## 1. Open Solution
+clone this project open cmd and git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
 Open the `EcomAppSearchableDesign.sln` file in Visual Studio.
 
 ## 2. Install EF Core Tools
