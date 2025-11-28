@@ -1,43 +1,50 @@
-# EcomAppSearchableDesign
+EcomAppSearchableDesign – Quick Setup & Cheat Sheet
 
-open sln file in visual studio 
-need to run migrations first 
-install ef  
+Tech Stack Overview:
+
+Backend: .NET 10 (Clean Architecture)
+
+Database: SQL Server
+
+ORM: Entity Framework Core
+
+Frontend: Can be integrated with any frontend (React/Next.js recommended)
+
+Other: JWT Authentication, Role-based Authorization (Admin/User)
+
+1. Open Project
+
+Open the .sln file in Visual Studio 2022+.
+
+2. Install EF Core CLI
+
+Install EF Core tools globally to run migrations:
 
 dotnet tool install --global dotnet-ef
 
-run migrations 
+3. Run Migrations
+Step 1: Create Initial Migration
 dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
 
-update
-dotnet ef database update --project Infrastructure   --startup-project EcomAppSearchableDesign
+Step 2: Update Database
+dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
 
-this will create tables and database . 
- 
 
- example EcomAppSearchableDesign is our project
- 
-S C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef
+✅ This creates all required tables in your SQL Server database.
 
- step1:
- this is for running migrations
- S C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+4. Register Users
 
-step 2
- this is for update 
- S C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+Register users with roles before using other endpoints.
 
-after migrations is done we can use the api endpoints.
-
-first we need to register user we have admin and user role 
+User Role Example
 {
   "email": "user1@example.com",
   "password": "Test@123",
   "fullName": "someuser",
   "role": "User"
 }
-this is for user role 
 
+Admin Role Example
 {
   "email": "Admin@example.com",
   "password": "Admin@123",
@@ -45,7 +52,26 @@ this is for user role
   "role": "Admin"
 }
 
-after registering we can add product , create order and export data in pdf and excel (these are only  for admin user)
-some role are for user and some are for admins . 
+
+Authentication uses JWT tokens stored in cookies or headers.
+
+5. API Actions by Role
+Action	User	Admin
+Add Product	❌	✅
+Create Order	❌	✅
+Export Data (PDF/Excel)	❌	✅
+View Orders	✅	✅
+
+Role-based authorization ensures certain features are restricted to Admins only.
+
+6. Folder/Project Structure (Clean Architecture)
+EcomAppSearchableDesign
+│
+├─ Infrastructure      # EF Core, DB context, Migrations
+├─ Application         # Business logic, CQRS, MediatR
+├─ Domain              # Entities, Value Objects
+├─ API (Startup Project)
+│   └─ Controllers     # API Endpoints
 
 
+This cheat sheet is all-in-one: commands, JSON samples, role info, tech stack, and clean architecture structure
