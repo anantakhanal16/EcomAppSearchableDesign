@@ -1,42 +1,49 @@
-EcomAppSearchableDesign – Quick Setup & Cheat Sheet
+EcomAppSearchableDesign – Step-by-Step Setup Guide
 
-Tech Stack Overview:
+Tech Stack: .NET 10, Clean Architecture, SQL Server, EF Core
 
-Backend: .NET 10 (Clean Architecture)
+Step 1: Open the Solution
 
-Database: SQL Server
+Open your solution in Visual Studio:
 
-ORM: Entity Framework Core
+File → Open → Project/Solution → EcomAppSearchableDesign.sln
 
-Frontend: Can be integrated with any frontend (React/Next.js recommended)
+Step 2: Install EF Core CLI Tool
 
-Other: JWT Authentication, Role-based Authorization (Admin/User)
+Install the Entity Framework Core global tool to run migrations:
 
-1. Open Project
-
-Open the .sln file in Visual Studio 2022+.
-
-2. Install EF Core CLI
-
-Install EF Core tools globally to run migrations:
-
-dotnet tool install --global dotnet-ef
-
-3. Run Migrations
-Step 1: Create Initial Migration
-dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
-
-Step 2: Update Database
-dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef
 
 
-✅ This creates all required tables in your SQL Server database.
+This allows you to run dotnet ef commands from anywhere.
 
-4. Register Users
+Step 3: Create Initial Migration
 
-Register users with roles before using other endpoints.
+Run this command to generate the initial migration for the database tables:
 
-User Role Example
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+
+
+--project Infrastructure → EF Core context is in the Infrastructure project
+
+--startup-project EcomAppSearchableDesign → Startup project with DI and configurations
+
+Step 4: Update Database
+
+Apply the migration to create the database and tables:
+
+C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
+
+
+✅ After this, your database and tables are ready.
+
+Step 5: Register Users
+
+Use your API endpoints to register users. Examples:
+
+User Role:
+
+POST /api/auth/register
 {
   "email": "user1@example.com",
   "password": "Test@123",
@@ -44,7 +51,10 @@ User Role Example
   "role": "User"
 }
 
-Admin Role Example
+
+Admin Role:
+
+POST /api/auth/register
 {
   "email": "Admin@example.com",
   "password": "Admin@123",
@@ -52,26 +62,34 @@ Admin Role Example
   "role": "Admin"
 }
 
+Step 6: Role-Based Actions
 
-Authentication uses JWT tokens stored in cookies or headers.
+Admin User can:
 
-5. API Actions by Role
-Action	User	Admin
-Add Product	❌	✅
-Create Order	❌	✅
-Export Data (PDF/Excel)	❌	✅
-View Orders	✅	✅
+Add products
 
-Role-based authorization ensures certain features are restricted to Admins only.
+Create orders
 
-6. Folder/Project Structure (Clean Architecture)
-EcomAppSearchableDesign
-│
-├─ Infrastructure      # EF Core, DB context, Migrations
-├─ Application         # Business logic, CQRS, MediatR
-├─ Domain              # Entities, Value Objects
-├─ API (Startup Project)
-│   └─ Controllers     # API Endpoints
+Export data to PDF and Excel
 
+Regular User can:
 
-This cheat sheet is all-in-one: commands, JSON samples, role info, tech stack, and clean architecture structure
+Access only user-level endpoints
+
+Step 7: Start Using API
+
+After registration, you can now:
+
+Log in with JWT authentication
+
+Perform CRUD operations for products and orders
+
+Access export features (PDF/Excel) as admin
+
+✅ This workflow follows Clean Architecture:
+
+Infrastructure → Database & EF Core
+
+Application → Business logic & CQRS
+
+API → Controllers & endpoints
