@@ -32,12 +32,10 @@ namespace Infrastructure.Services
 
                 var productIds = dto.OrderDetails.Select(d => d.ProductID).Distinct().OrderBy(id => id).ToList();
 
-                //lock products for update
                 var products = await _context.Products.FromSqlInterpolated($@"
                     SELECT * FROM Products WITH (UPDLOCK, ROWLOCK)
                     WHERE ProductID IN ({string.Join(",", productIds)}) 
                     ORDER BY ProductID").ToListAsync(cancellationToken);
-
 
                 var missingProductIds = productIds.Except(products.Select(p => p.ProductID)).ToList();
                 if (missingProductIds.Any())
@@ -81,14 +79,13 @@ namespace Infrastructure.Services
 
                 await _context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-
                 var mapped = MapToDto(order);
                 return HttpResponses<OrderResponseDto>.SuccessResponse(mapped, "Order created successfully.");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-                return HandleOrderException(ex);
+                return HttpResponses<OrderResponseDto>.FailResponse( "Failed to create order.");
             }
         }
 
@@ -290,28 +287,6 @@ namespace Infrastructure.Services
                     ProductName = d.Product.ProductName
                 }).ToList()
             };
-        }
-
-        private static HttpResponses<OrderResponseDto> HandleOrderException(Exception ex)
-        {
-            if (ex is OperationCanceledException) return HttpResponses<OrderResponseDto>.FailResponse("Order creation was cancelled.");
-
-            if (ex is DbUpdateConcurrencyException) return HttpResponses<OrderResponseDto>.FailResponse("Order was modified by another process. Try again.");
-
-            if (ex is DbUpdateException dbEx) return HttpResponses<OrderResponseDto>.FailResponse($"Database update error: {dbEx.InnerException?.Message ?? dbEx.Message}");
-
-            if (ex is SqlException sqlEx)
-            {
-                return sqlEx.Number switch
-                {
-                    1222 => HttpResponses<OrderResponseDto>.FailResponse("Order timeout. Please try again."),
-                    1205 => HttpResponses<OrderResponseDto>.FailResponse("Order conflict (deadlock). Try again."),
-                    547 or 2627 or 2601 => HttpResponses<OrderResponseDto>.FailResponse($"Data integrity error: {sqlEx.Message}"),
-                    _ => HttpResponses<OrderResponseDto>.FailResponse($"Database error (Code {sqlEx.Number}): {sqlEx.Message}")
-                };
-            }
-
-            return HttpResponses<OrderResponseDto>.FailResponse($"Failed to create order: {ex.Message}");
         }
 
         private List<ExportOrderReportDto> CleanAndSanitizeData(List<OrderResponseDto> dataItems)
