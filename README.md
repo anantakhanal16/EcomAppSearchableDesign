@@ -41,7 +41,7 @@ Customizable export templates
 🚀 Getting Started
 Prerequisites
 
-.NET 8.0 SDK or later
+.NET 10.0 SDK or later
 SQL Server
 Visual Studio 2022 or VS Code
 
