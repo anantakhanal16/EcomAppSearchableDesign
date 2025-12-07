@@ -1,133 +1,153 @@
-# EcomAppSearchableDesign Setup and Usage Guide
+EcomAppSearchableDesign 🛒
+A full-featured e-commerce backend API built with .NET Core, implementing Clean Architecture principles with comprehensive product, order, and user management capabilities.
+✨ Features
+🔐 Authentication & Authorization
 
-## 1. Open Solution
-first clone this project
+JWT-based authentication with secure token management
+Role-based access control (Admin & User roles)
+User registration and login
+Profile management
 
-open cmd and git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
+📦 Product Management
 
-Open the `EcomAppSearchableDesign.sln` file in Visual Studio.
+Full CRUD operations for products
+Product image upload support
+Pagination for large product catalogs
+Bulk product import from Excel files
+Advanced search and filtering capabilities
 
-## 2. Install EF Core Tools
+🛍️ Shopping Cart
 
-To run migrations, first install the Entity Framework Core CLI tool:
-
-dotnet tool install --global dotnet-ef
-
-3. Run Migrations
-Create the initial migration:
-dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
-
-Update the database:
-dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
-
-
-This will create the necessary tables and the database.
-
-Sample Example:
-
-  # Step 1: Install EF Core CLI
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef 
-
-# Step 2: Add migration
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign  
-
- # Step 3: Update database
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign 
-
- Using API Endpoints
-After migrations are done, you can start using the API endpoints.
-
-4.1 Register Users
-You need to register users with roles. There are Admin and User roles.
-
-User Role Example:
-{
-  "email": "user1@example.com",
-  "password": "Test@123",
-  "fullName": "someuser",
-  "role": "User"
-}
-Admin Role Example:
-
-json
-Copy code
-{
-  "email": "Admin@example.com",
-  "password": "Admin@123",
-  "fullName": "adminUser",
-  "role": "Admin"
-}
-4.2 Admin Capabilities
-After registering as an Admin, you can:
-
-Add products
-
-Create orders
-
-Export data to PDF and Excel
-
-4.3 Role-Based Access
-Some API endpoints are restricted to Admin users.
-
-Other endpoints are accessible to User roles.
-
-if u have read this  leave a comment or star.
-
-
-Key Features
-🛒 User Account & Authentication
-
-Secure user registration and login with JWT
-
-Role-based access: Admin and User
-
-View and manage user profile
-
-Logout functionality
-
-📦 Product Management (Admin)
-
-Create, update, and delete products
-
-Upload product images
-
-View all products with pagination
-
-Import product data from Excel files
-
-🛍 Shopping Cart
-
-Add products to cart
-
-Update or remove items in cart
-
-Clear entire cart
-
-View current cart contents
+Add/remove products from cart
+Update item quantities
+Cart persistence across sessions
+Clear cart functionality
+View cart summary
 
 📝 Order Management
 
-Place new orders
+Complete order placement workflow
+Order history with detailed information
+Advanced search, filter, and pagination
+Order status tracking
+Admin order management (update/cancel)
 
-View order details
+📊 Data Export
 
-View all user orders with search, filter, and pagination
+Export orders to Excel format
+Generate PDF reports
+Customizable export templates
 
-Update or cancel orders (Admin)
+🚀 Getting Started
+Prerequisites
 
-Export orders in Excel or PDF
+.NET 8.0 SDK or later
+SQL Server
+Visual Studio 2022 or VS Code
 
-🔐 Security
+Installation
 
-JWT authentication for all sensitive endpoints
-Tech Stack
+Clone the repository
 
-Backend: .NET Core Web API
+bash git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
+cd EcomAppSearchableDesign
 
-Database: SqlServer
+Install EF Core Tools (if not already installed)
 
-Authentication: JWT
+bashdotnet tool install --global dotnet-ef
 
-File Uploads: Excel, Images
+Update Connection String
+Open appsettings.json in the EcomAppSearchableDesign project and update the connection string to match your SQL Server instance.
+Run Database Migrations
 
-Export: Excel & PDF
+bash# Create migration
+dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
+
+# Apply migration to database
+dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
+
+Run the Application
+
+bashdotnet run --project EcomAppSearchableDesign
+The API will be available at https://localhost:7xxx or http://localhost:5xxx
+📖 API Usage
+Register Users
+User Registration
+jsonPOST /api/auth/register
+{
+  "email": "user@example.com",
+  "password": "User@123",
+  "fullName": "John Doe",
+  "role": "User"
+}
+Admin Registration
+jsonPOST /api/auth/register
+{
+  "email": "admin@example.com",
+  "password": "Admin@123",
+  "fullName": "Admin User",
+  "role": "Admin"
+}
+Authentication
+Login
+jsonPOST /api/auth/login
+{
+  "email": "user@example.com",
+  "password": "User@123"
+}
+Response includes JWT token for authenticated requests.
+Role-Based Access
+Admin-Only Endpoints
+
+POST /api/products - Create products
+PUT /api/products/{id} - Update products
+DELETE /api/products/{id} - Delete products
+POST /api/products/import - Bulk import from Excel
+PUT /api/orders/{id} - Update order status
+DELETE /api/orders/{id} - Cancel orders
+
+User Endpoints
+
+GET /api/products - View products
+POST /api/cart - Manage shopping cart
+POST /api/orders - Place orders
+GET /api/orders - View own orders
+
+🏗️ Architecture
+This project follows Clean Architecture principles with clear separation of concerns:
+
+Domain Layer - Core business entities and logic
+Application Layer - Use cases, DTOs, and interfaces
+Infrastructure Layer - Data access, external services
+API Layer - Controllers, middleware, and configuration
+
+🛠️ Tech Stack
+
+Framework: .NET 10.0 / ASP.NET Core Web API
+Database: SQL Server with Entity Framework Core
+Authentication: JWT (JSON Web Tokens)
+Architecture: Clean Architecture / Onion Architecture
+File Processing: EPPlus for Excel, iTextSharp/QuestPDF for PDF
+Documentation: Swagger/OpenAPI
+
+📝 API Documentation
+After running the application, access the Swagger UI at:
+https://localhost:7xxx/swagger
+🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+Fork the project
+Create your feature branch (git checkout -b feature/AmazingFeature)
+Commit your changes (git commit -m 'Add some AmazingFeature')
+Push to the branch (git push origin feature/AmazingFeature)
+Open a Pull Request
+
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+👨‍💻 Author
+Ananta Khanal
+
+GitHub: @anantakhanal16
+
+⭐ Show Your Support
+If you find this project useful, please consider giving it a star on GitHub!
