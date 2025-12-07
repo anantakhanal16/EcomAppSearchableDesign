@@ -72,3 +72,62 @@ Some API endpoints are restricted to Admin users.
 Other endpoints are accessible to User roles.
 
 if u have read this  leave a comment or star.
+
+
+Key Features
+🛒 User Account & Authentication
+
+Secure user registration and login with JWT
+
+Role-based access: Admin and User
+
+View and manage user profile
+
+Logout functionality
+
+📦 Product Management (Admin)
+
+Create, update, and delete products
+
+Upload product images
+
+View all products with pagination
+
+Import product data from Excel files
+
+🛍 Shopping Cart
+
+Add products to cart
+
+Update or remove items in cart
+
+Clear entire cart
+
+View current cart contents
+
+📝 Order Management
+
+Place new orders
+
+View order details
+
+View all user orders with search, filter, and pagination
+
+Update or cancel orders (Admin)
+
+Export orders in Excel or PDF
+
+🔐 Security
+
+JWT authentication for all sensitive endpoints
+Tech Stack
+
+Backend: .NET Core Web API
+
+Database: SqlServer
+
+Authentication: JWT
+
+File Uploads: Excel, Images
+
+Export: Excel & PDF
