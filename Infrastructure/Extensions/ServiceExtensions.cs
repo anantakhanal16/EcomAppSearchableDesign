@@ -13,6 +13,7 @@ namespace Infrastructure.ServiceExtensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUtlityServices, UtlitesServices>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<ICartService, CartService>();
             return services;
         }
     }
