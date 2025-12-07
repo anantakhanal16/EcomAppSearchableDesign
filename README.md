@@ -41,9 +41,9 @@ A full-featured e-commerce backend API built with .NET Core, implementing Clean 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- .NET 8.0 SDK or later
+- .NET 10.0 SDK or later
 - SQL Server
-- Visual Studio 2022 or VS Code
+- Visual Studio 2026 or VS Code
 
 ### Installation
 
@@ -144,7 +144,7 @@ This project follows **Clean Architecture** principles with clear separation of 
 
 ## 🛠️ Tech Stack
 
-- **Framework**: .NET 8.0 / ASP.NET Core Web API
+- **Framework**: .NET 10.0 / ASP.NET Core Web API
 - **Database**: SQL Server with Entity Framework Core
 - **Authentication**: JWT (JSON Web Tokens)
 - **Architecture**: Clean Architecture / Onion Architecture
