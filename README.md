@@ -18,6 +18,7 @@ A full-featured e-commerce backend API built with .NET Core, implementing Clean 
 - Pagination for large product catalogs
 - Bulk product import from Excel files
 - Advanced search and filtering capabilities
+- Product ratings support
 
 ### 🛍️ Shopping Cart
 - Add/remove products from cart
