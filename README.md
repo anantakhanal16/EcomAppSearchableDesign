@@ -1,74 +1,186 @@
-# EcomAppSearchableDesign Setup and Usage Guide
 
-## 1. Open Solution
-first clone this project
+[Uploading ecom_readme.md…]()
+# EcomAppSearchableDesign 🛒
 
-open cmd and git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
+A full-featured e-commerce backend API built with .NET Core, implementing Clean Architecture principles with comprehensive product, order, and user management capabilities.
 
-Open the `EcomAppSearchableDesign.sln` file in Visual Studio.
+## ✨ Features
 
-## 2. Install EF Core Tools
+### 🔐 Authentication & Authorization
+- JWT-based authentication with secure token management
+- Role-based access control (Admin & User roles)
+- User registration and login
+- Profile management
 
-To run migrations, first install the Entity Framework Core CLI tool:
+### 📦 Product Management
+- Full CRUD operations for products
+- Product image upload support
+- Pagination for large product catalogs
+- Bulk product import from Excel files
+- Advanced search and filtering capabilities
 
+### 🛍️ Shopping Cart
+- Add/remove products from cart
+- Update item quantities
+- Cart persistence across sessions
+- Clear cart functionality
+- View cart summary
+
+### 📝 Order Management
+- Complete order placement workflow
+- Order history with detailed information
+- Advanced search, filter, and pagination
+- Order status tracking
+- Admin order management (update/cancel)
+
+### 📊 Data Export
+- Export orders to Excel format
+- Generate PDF reports
+- Customizable export templates
+
+## 🚀 Getting Started
+
+### Prerequisites
+- .NET 10.0 SDK or later
+- SQL Server
+- Visual Studio 2026 or VS Code
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/anantakhanal16/EcomAppSearchableDesign.git
+cd EcomAppSearchableDesign
+```
+
+2. **Install EF Core Tools** (if not already installed)
+```bash
 dotnet tool install --global dotnet-ef
+```
 
-3. Run Migrations
-Create the initial migration:
+3. **Update Connection String**
+   
+   Open `appsettings.json` in the `EcomAppSearchableDesign` project and update the connection string to match your SQL Server instance.
+
+4. **Run Database Migrations**
+```bash
+# Create migration
 dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign
 
-Update the database:
+# Apply migration to database
 dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign
+```
 
+5. **Run the Application**
+```bash
+dotnet run --project EcomAppSearchableDesign
+```
 
-This will create the necessary tables and the database.
+The API will be available at `https://localhost:7xxx` or `http://localhost:5xxx`
 
-Sample Example:
+## 📖 API Usage
 
-  # Step 1: Install EF Core CLI
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet tool install --global dotnet-ef 
+### Register Users
 
-# Step 2: Add migration
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef migrations add InitialCreate --project Infrastructure --startup-project EcomAppSearchableDesign  
-
- # Step 3: Update database
-C:\Users\User\source\repos\EcomAppSearchableDesign> dotnet ef database update --project Infrastructure --startup-project EcomAppSearchableDesign 
-
- Using API Endpoints
-After migrations are done, you can start using the API endpoints.
-
-4.1 Register Users
-You need to register users with roles. There are Admin and User roles.
-
-User Role Example:
+**User Registration**
+```json
+POST /api/auth/register
 {
-  "email": "user1@example.com",
-  "password": "Test@123",
-  "fullName": "someuser",
+  "email": "user@example.com",
+  "password": "User@123",
+  "fullName": "John Doe",
   "role": "User"
 }
-Admin Role Example:
+```
 
-json
-Copy code
+**Admin Registration**
+```json
+POST /api/auth/register
 {
-  "email": "Admin@example.com",
+  "email": "admin@example.com",
   "password": "Admin@123",
-  "fullName": "adminUser",
+  "fullName": "Admin User",
   "role": "Admin"
 }
-4.2 Admin Capabilities
-After registering as an Admin, you can:
+```
 
-Add products
+### Authentication
 
-Create orders
+**Login**
+```json
+POST /api/auth/login
+{
+  "email": "user@example.com",
+  "password": "User@123"
+}
+```
 
-Export data to PDF and Excel
+Response includes JWT token for authenticated requests.
 
-4.3 Role-Based Access
-Some API endpoints are restricted to Admin users.
+### Role-Based Access
 
-Other endpoints are accessible to User roles.
+#### Admin-Only Endpoints
+- `POST /api/products` - Create products
+- `PUT /api/products/{id}` - Update products
+- `DELETE /api/products/{id}` - Delete products
+- `POST /api/products/import` - Bulk import from Excel
+- `PUT /api/orders/{id}` - Update order status
+- `DELETE /api/orders/{id}` - Cancel orders
 
-if u have read this  leave a comment or star.
+#### User Endpoints
+- `GET /api/products` - View products
+- `POST /api/cart` - Manage shopping cart
+- `POST /api/orders` - Place orders
+- `GET /api/orders` - View own orders
+
+## 🏗️ Architecture
+
+This project follows **Clean Architecture** principles with clear separation of concerns:
+
+- **Domain Layer** - Core business entities and logic
+- **Application Layer** - Use cases, DTOs, and interfaces
+- **Infrastructure Layer** - Data access, external services
+- **API Layer** - Controllers, middleware, and configuration
+
+## 🛠️ Tech Stack
+
+- **Framework**: .NET 10.0 / ASP.NET Core Web API
+- **Database**: SQL Server with Entity Framework Core
+- **Authentication**: JWT (JSON Web Tokens)
+- **Architecture**: Clean Architecture / Onion Architecture
+- **File Processing**: EPPlus for Excel, iTextSharp/QuestPDF for PDF
+- **Documentation**: Swagger/OpenAPI
+
+## 📝 API Documentation
+
+After running the application, access the Swagger UI at:
+```
+https://localhost:7xxx/swagger
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👨‍💻 Author
+
+**Ananta Khanal**
+- GitHub: [@anantakhanal16](https://github.com/anantakhanal16)
+
+## ⭐ Show Your Support
+
+If you find this project useful, please consider giving it a star on GitHub!
+
+---
+
+**Note**: This is a learning/portfolio project demonstrating modern .NET development practices including Clean Architecture, CQRS patterns, and comprehensive API design.
