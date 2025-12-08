@@ -23,7 +23,6 @@ A full-featured e-commerce backend API built with .NET Core, implementing Clean 
 ### 🛍️ Shopping Cart
 - Add/remove products from cart
 - Update item quantities
-- Cart persistence across sessions
 - Clear cart functionality
 - View cart summary
 
