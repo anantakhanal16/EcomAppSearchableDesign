@@ -5,10 +5,12 @@ using Application.Dtos;
 using Application.Helpers;
 using Application.Interfaces;
 using ClosedXML.Excel;
+using Core.Entities;
 using Domain.Entities;
 using Humanizer;
 using iText.Commons.Actions.Data;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
@@ -16,12 +18,14 @@ namespace Infrastructure.Services
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProductService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
+        public ProductService(AppDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<User> userManager)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         public async Task<HttpResponses<ProductResponseDto>> CreateProductAsync(ProductCreateDto dto, CancellationToken cancellationToken)
@@ -352,6 +356,90 @@ namespace Infrastructure.Services
             {
                 Success = true,
                 Message = "Validation successful"
+            };
+        }
+
+        public async Task<HttpResponses<ProductReviewResponseDto>> CreateAsync(CreateProductReviewDto dto, string userId, CancellationToken cancellationToken)
+        {
+            var productExists = await _context.Products.AnyAsync(p => p.ProductID == dto.ProductId, cancellationToken);
+
+            if (!productExists) return HttpResponses<ProductReviewResponseDto>.FailResponse("Product does not exist.");
+            var user = await _userManager.Users.Where(u => u.Id == userId).FirstOrDefaultAsync() ?? new User();
+
+            var review = new ProductReview
+            {
+                ProductId = dto.ProductId,
+                Comment = dto.Comment,
+                Rating = dto.Rating,
+                ReviewerName = user.FullName ?? "",
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ProductReviews.Add(review);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var response = MapReview(review);
+            return HttpResponses<ProductReviewResponseDto>.SuccessResponse(response, "Review added successfully.");
+        }
+
+        public async Task<HttpResponses<ProductReviewResponseDto>> UpdateAsync(UpdateProductReviewDto dto, string userId, CancellationToken cancellationToken)
+        {
+            var review = await _context.ProductReviews.FirstOrDefaultAsync(r => r.ReviewId == dto.ReviewId && r.UserId == userId, cancellationToken);
+
+            if (review == null) return HttpResponses<ProductReviewResponseDto>.FailResponse("Review not found.");
+
+            review.Comment = dto.Comment;
+            review.Rating = dto.Rating;
+
+            _context.ProductReviews.Update(review);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var response = MapReview(review);
+            return HttpResponses<ProductReviewResponseDto>.SuccessResponse(response, "Review updated successfully.");
+        }
+
+        public async Task<HttpResponses<string>> DeleteAsync(int reviewId, CancellationToken cancellationToken)
+        {
+            var review = await _context.ProductReviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId, cancellationToken);
+
+            if (review == null) return HttpResponses<string>.FailResponse("Review not found.");
+
+            _context.ProductReviews.Remove(review);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return HttpResponses<string>.SuccessResponse("Review deleted successfully.");
+        }
+
+        public async Task<HttpResponses<ProductReviewResponseDto>> GetByIdAsync(int reviewId, CancellationToken cancellationToken)
+        {
+            var review = await _context.ProductReviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId, cancellationToken);
+
+            if (review == null) return HttpResponses<ProductReviewResponseDto>.FailResponse("Review not found.");
+
+            var response = MapReview(review);
+            return HttpResponses<ProductReviewResponseDto>.SuccessResponse(response);
+        }
+
+        public async Task<HttpResponses<List<ProductReviewResponseDto>>> GetByProductIdAsync(int productId, CancellationToken cancellationToken)
+        {
+            var reviews = await _context.ProductReviews.Where(r => r.ProductId == productId).OrderByDescending(r => r.CreatedAt).ToListAsync(cancellationToken);
+
+            var mapped = reviews.Select(MapReview).ToList();
+
+            return HttpResponses<List<ProductReviewResponseDto>>.SuccessResponse(mapped, "Product reviews retrieved.");
+        }
+
+        private ProductReviewResponseDto MapReview(ProductReview review)
+        {
+            return new ProductReviewResponseDto
+            {
+                ReviewId = review.ReviewId,
+                ProductId = review.ProductId,
+                ReviewerName = review.ReviewerName,
+                Comment = review.Comment,
+                Rating = review.Rating,
+                CreatedAt = review.CreatedAt
             };
         }
     }

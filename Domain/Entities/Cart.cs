@@ -7,7 +7,7 @@ namespace Domain.Entities
 {
     public class Cart
     {
-        [Key]
+        [Key] 
         public int CartID { get; set; }
 
         public string UserID { get; set; }

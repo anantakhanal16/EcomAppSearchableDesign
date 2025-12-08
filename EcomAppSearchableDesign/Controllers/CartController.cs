@@ -43,9 +43,9 @@ namespace EcomAppSearchableDesign.Controllers
             return await _cartService.AddItemAsync(userId, dto, cancellationToken);
         }
 
-     
-    [HttpPut("update-item")]
-    public async Task<HttpResponses<CartResponseDto>> UpdateItem([FromQuery]int id,[FromBody]CartItemUpdateDto dto, CancellationToken cancellationToken)
+
+        [HttpPut("update-item")]
+        public async Task<HttpResponses<CartResponseDto>> UpdateItem([FromQuery] int id, [FromBody] CartItemUpdateDto dto, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {

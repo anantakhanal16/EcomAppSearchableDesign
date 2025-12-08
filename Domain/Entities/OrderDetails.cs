@@ -7,7 +7,7 @@ namespace Domain.Entities
 {
     public class OrderDetails
     {
-        [Key]
+        [Key] 
         public int OrderDetailID { get; set; }
         public int OrderID { get; set; }
         public int ProductID { get; set; }

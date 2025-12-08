@@ -1,4 +1,5 @@
-﻿using Application.Dtos;
+﻿using System.Security.Claims;
+using Application.Dtos;
 using Application.Helpers;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -73,5 +74,62 @@ public class ProductController(IProductService productService) : ControllerBase
 
         using var stream = file.OpenReadStream();
         return await productService.ImportProductData(stream, cancellationToken);
+    }
+
+    [HttpPost("create-review")]
+    public async Task<HttpResponses<ProductReviewResponseDto>> CreateReview([FromBody] CreateProductReviewDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ModelState.ToErrorResponse<ProductReviewResponseDto>();
+        }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+        return await productService.CreateAsync(dto, userId, cancellationToken);
+    }
+
+    [HttpPut("update-review")]
+    public async Task<HttpResponses<ProductReviewResponseDto>> UpdateReview([FromBody] UpdateProductReviewDto dto, CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ModelState.ToErrorResponse<ProductReviewResponseDto>();
+        }
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+
+        return await productService.UpdateAsync(dto,userId, cancellationToken);
+    }
+
+    [HttpDelete("delete-review/{reviewId:int}")]
+    public async Task<HttpResponses<string>> DeleteReview(int reviewId, CancellationToken cancellationToken)
+    {
+        if (reviewId == 0)
+        {
+            return ModelState.ToErrorResponse<string>();
+        }
+
+        return await productService.DeleteAsync(reviewId, cancellationToken);
+    }
+
+    [HttpGet("get-review/{reviewId:int}")]
+    public async Task<HttpResponses<ProductReviewResponseDto>> GetReviewById(int reviewId, CancellationToken cancellationToken)
+    {
+        if (reviewId == 0)
+        {
+            return ModelState.ToErrorResponse<ProductReviewResponseDto>();
+        }
+
+        return await productService.GetByIdAsync(reviewId, cancellationToken);
+    }
+
+    [HttpGet("get-product-reviews/{productId:int}")]
+    public async Task<HttpResponses<List<ProductReviewResponseDto>>> GetReviewsByProductId(int productId, CancellationToken cancellationToken)
+    {
+        if (productId == 0)
+        {
+            return ModelState.ToErrorResponse<List<ProductReviewResponseDto>>();
+        }
+
+        return await productService.GetByProductIdAsync(productId, cancellationToken);
     }
 }

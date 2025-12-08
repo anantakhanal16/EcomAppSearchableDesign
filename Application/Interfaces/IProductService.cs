@@ -14,5 +14,10 @@ namespace Application.Interfaces
         Task<HttpResponses<ProductResponseDto>> GetProductByIdAsync(int id, CancellationToken cancellationToken);
         Task<HttpResponses<string>> ImportProductData(Stream fileStream, CancellationToken cancellationToken);
         Task<HttpResponses<PagedResult<ProductResponseDto>>> GetAllProductsAsync(GetAllProductDto dto, CancellationToken cancellationToken);
+        Task<HttpResponses<ProductReviewResponseDto>> CreateAsync(CreateProductReviewDto dto, string userId, CancellationToken cancellationToken);
+        Task<HttpResponses<ProductReviewResponseDto>> UpdateAsync(UpdateProductReviewDto dto, string userId, CancellationToken cancellationToken);
+        Task<HttpResponses<string>> DeleteAsync(int reviewId, CancellationToken cancellationToken);
+        Task<HttpResponses<ProductReviewResponseDto>> GetByIdAsync(int reviewId, CancellationToken cancellationToken);
+        Task<HttpResponses<List<ProductReviewResponseDto>>> GetByProductIdAsync(int productId, CancellationToken cancellationToken);
     }
 }

@@ -7,8 +7,7 @@ namespace Domain.Entities
 {
     public class Product
     {
-        [Key]
-        public int ProductID { get; set; }
+        [Key] public int ProductID { get; set; }
         public string ProductName { get; set; }
         public string Category { get; set; }
         public decimal Price { get; set; }
@@ -21,5 +20,6 @@ namespace Domain.Entities
         // Navigation property
         public Supplier Supplier { get; set; }
         public ICollection<OrderDetails> OrderDetails { get; set; }
+        public ICollection<ProductReview> ProductReviews { get; set; }
     }
 }

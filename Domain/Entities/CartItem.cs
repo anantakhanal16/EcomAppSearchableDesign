@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    public  class CartItem
+    public class CartItem
     {
         [Key]
         public int CartItemID { get; set; }
@@ -20,7 +20,6 @@ namespace Domain.Entities
         public decimal UnitPrice { get; set; }
 
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
-        public Product Product { get; set; } 
-
+        public Product Product { get; set; }
     }
 }

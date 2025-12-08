@@ -18,27 +18,18 @@ namespace Infrastructure.Services
 
         public async Task<HttpResponses<CartResponseDto>> GetCartAsync(string userId, CancellationToken cancellationToken)
         {
-            var cart = await _context.Cart
-                .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.Product)
-                .FirstOrDefaultAsync(c => c.UserID == userId, cancellationToken);
+            var cart = await _context.Cart.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.UserID == userId, cancellationToken);
 
-            if (cart == null)
-                return HttpResponses<CartResponseDto>.FailResponse("Cart is empty.");
+            if (cart == null) return HttpResponses<CartResponseDto>.FailResponse("Cart is empty.");
 
             return HttpResponses<CartResponseDto>.SuccessResponse(MapToDto(cart), "Cart retrieved successfully.");
         }
 
         public async Task<HttpResponses<CartResponseDto>> AddItemAsync(string userId, CartItemCreateDto dto, CancellationToken cancellationToken)
         {
-
             try
             {
-
-                var cart = await _context.Cart
-                    .Include(c => c.CartItems)
-                    .ThenInclude(ci => ci.Product)
-                    .FirstOrDefaultAsync(c => c.UserID == userId, cancellationToken);
+                var cart = await _context.Cart.Include(c => c.CartItems).ThenInclude(ci => ci.Product).FirstOrDefaultAsync(c => c.UserID == userId, cancellationToken);
 
                 if (cart == null)
                 {
@@ -55,8 +46,7 @@ namespace Infrastructure.Services
                 var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductID == dto.ProductID);
                 var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductID == dto.ProductID, cancellationToken);
 
-                if (product == null)
-                    return HttpResponses<CartResponseDto>.FailResponse("Product not found.");
+                if (product == null) return HttpResponses<CartResponseDto>.FailResponse("Product not found.");
 
                 if (existingItem != null)
                     existingItem.Quantity += dto.Quantity;
@@ -82,12 +72,9 @@ namespace Infrastructure.Services
 
         public async Task<HttpResponses<CartResponseDto>> UpdateItemAsync(string userId, int cartItemId, CartItemUpdateDto dto, CancellationToken cancellationToken)
         {
-            var item = await _context.CartItem
-                .Include(ci => ci.Cart)
-                .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId && ci.Cart.UserID == userId, cancellationToken);
+            var item = await _context.CartItem.Include(ci => ci.Cart).FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId && ci.Cart.UserID == userId, cancellationToken);
 
-            if (item == null)
-                return HttpResponses<CartResponseDto>.FailResponse("Cart item not found.");
+            if (item == null) return HttpResponses<CartResponseDto>.FailResponse("Cart item not found.");
 
             item.Quantity = dto.Quantity;
             await _context.SaveChangesAsync(cancellationToken);
@@ -97,12 +84,9 @@ namespace Infrastructure.Services
 
         public async Task<HttpResponses<string>> RemoveItemAsync(string userId, int cartItemId, CancellationToken cancellationToken)
         {
-            var item = await _context.CartItem
-                .Include(ci => ci.Cart)
-                .FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId && ci.Cart.UserID == userId, cancellationToken);
+            var item = await _context.CartItem.Include(ci => ci.Cart).FirstOrDefaultAsync(ci => ci.CartItemID == cartItemId && ci.Cart.UserID == userId, cancellationToken);
 
-            if (item == null)
-                return HttpResponses<string>.FailResponse("Cart item not found.");
+            if (item == null) return HttpResponses<string>.FailResponse("Cart item not found.");
 
             _context.CartItem.Remove(item);
             await _context.SaveChangesAsync(cancellationToken);
@@ -112,12 +96,9 @@ namespace Infrastructure.Services
 
         public async Task<HttpResponses<string>> ClearCartAsync(string userId, CancellationToken cancellationToken)
         {
-            var cart = await _context.Cart
-                .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.UserID == userId, cancellationToken);
+            var cart = await _context.Cart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.UserID == userId, cancellationToken);
 
-            if (cart == null || !cart.CartItems.Any())
-                return HttpResponses<string>.FailResponse("Cart is already empty.");
+            if (cart == null || !cart.CartItems.Any()) return HttpResponses<string>.FailResponse("Cart is already empty.");
 
             _context.CartItem.RemoveRange(cart.CartItems);
             await _context.SaveChangesAsync(cancellationToken);

@@ -1,0 +1,177 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5872AEB3-BAA3-FE31-B0EB-0FB6DBEDCF83}|Infrastructure\\Infrastructure.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\infrastructure\\services\\productservice .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5872AEB3-BAA3-FE31-B0EB-0FB6DBEDCF83}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\services\\productservice .cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\application\\helpers\\httpresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|solutionrelative:application\\helpers\\httpresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\application\\dtos\\productreviewresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|solutionrelative:application\\dtos\\productreviewresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\application\\dtos\\createproductreviewdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|solutionrelative:application\\dtos\\createproductreviewdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{324948E6-31A9-EEDD-14F1-C1707E74FBD8}|EcomAppSearchableDesign\\EcomAppSearchableDesign.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\ecomappsearchabledesign\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{324948E6-31A9-EEDD-14F1-C1707E74FBD8}|EcomAppSearchableDesign\\EcomAppSearchableDesign.csproj|solutionrelative:ecomappsearchabledesign\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5872AEB3-BAA3-FE31-B0EB-0FB6DBEDCF83}|Infrastructure\\Infrastructure.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\infrastructure\\services\\identityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5872AEB3-BAA3-FE31-B0EB-0FB6DBEDCF83}|Infrastructure\\Infrastructure.csproj|solutionrelative:infrastructure\\services\\identityservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{324948E6-31A9-EEDD-14F1-C1707E74FBD8}|EcomAppSearchableDesign\\EcomAppSearchableDesign.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\ecomappsearchabledesign\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{324948E6-31A9-EEDD-14F1-C1707E74FBD8}|EcomAppSearchableDesign\\EcomAppSearchableDesign.csproj|solutionrelative:ecomappsearchabledesign\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\application\\interfaces\\iproductservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F80C4E72-27A0-12B5-0634-DD5C11CFB0C1}|Application\\Application.csproj|solutionrelative:application\\interfaces\\iproductservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{324948E6-31A9-EEDD-14F1-C1707E74FBD8}|EcomAppSearchableDesign\\EcomAppSearchableDesign.csproj|c:\\users\\user\\source\\repos\\ecomappsearchabledesign\\ecomappsearchabledesign\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{324948E6-31A9-EEDD-14F1-C1707E74FBD8}|EcomAppSearchableDesign\\EcomAppSearchableDesign.csproj|solutionrelative:ecomappsearchabledesign\\controllers\\ordercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 9,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "HttpResponse.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Helpers\\HttpResponse.cs",
+              "RelativeDocumentMoniker": "Application\\Helpers\\HttpResponse.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Helpers\\HttpResponse.cs",
+              "RelativeToolTip": "Application\\Helpers\\HttpResponse.cs",
+              "ViewState": "AgIAAC4AAAAAAAAAAAArwDAAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T15:29:32.872Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IProductService.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Interfaces\\IProductService.cs",
+              "RelativeDocumentMoniker": "Application\\Interfaces\\IProductService.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Interfaces\\IProductService.cs",
+              "RelativeToolTip": "Application\\Interfaces\\IProductService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T15:11:01.796Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProductReviewResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Dtos\\ProductReviewResponseDto.cs",
+              "RelativeDocumentMoniker": "Application\\Dtos\\ProductReviewResponseDto.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Dtos\\ProductReviewResponseDto.cs",
+              "RelativeToolTip": "Application\\Dtos\\ProductReviewResponseDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAYAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T15:04:28.476Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CreateProductReviewDto.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Dtos\\CreateProductReviewDto.cs",
+              "RelativeDocumentMoniker": "Application\\Dtos\\CreateProductReviewDto.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Application\\Dtos\\CreateProductReviewDto.cs",
+              "RelativeToolTip": "Application\\Dtos\\CreateProductReviewDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T14:59:49.084Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IdentityService.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Infrastructure\\Services\\IdentityService.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Services\\IdentityService.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Infrastructure\\Services\\IdentityService.cs",
+              "RelativeToolTip": "Infrastructure\\Services\\IdentityService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T14:52:43.208Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\EcomAppSearchableDesign\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "EcomAppSearchableDesign\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\EcomAppSearchableDesign\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "EcomAppSearchableDesign\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAAAowDAAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T14:52:43.233Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "OrderController.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\EcomAppSearchableDesign\\Controllers\\OrderController.cs",
+              "RelativeDocumentMoniker": "EcomAppSearchableDesign\\Controllers\\OrderController.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\EcomAppSearchableDesign\\Controllers\\OrderController.cs",
+              "RelativeToolTip": "EcomAppSearchableDesign\\Controllers\\OrderController.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T14:58:18.666Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProductController.cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\EcomAppSearchableDesign\\Controllers\\ProductController.cs",
+              "RelativeDocumentMoniker": "EcomAppSearchableDesign\\Controllers\\ProductController.cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\EcomAppSearchableDesign\\Controllers\\ProductController.cs",
+              "RelativeToolTip": "EcomAppSearchableDesign\\Controllers\\ProductController.cs",
+              "ViewState": "AgIAAHMAAAAAAAAAAAAwwIQAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T14:52:43.257Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProductService .cs",
+              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Infrastructure\\Services\\ProductService .cs",
+              "RelativeDocumentMoniker": "Infrastructure\\Services\\ProductService .cs",
+              "ToolTip": "C:\\Users\\User\\source\\repos\\EcomAppSearchableDesign\\Infrastructure\\Services\\ProductService .cs",
+              "RelativeToolTip": "Infrastructure\\Services\\ProductService .cs",
+              "ViewState": "AgIAABABAAAAAAAAAAAswG8BAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-08T14:52:43.281Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
