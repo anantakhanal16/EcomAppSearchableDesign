@@ -40,6 +40,7 @@ using (var scope = app.Services.CreateScope())
 app.UseStaticFiles();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors("ReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
