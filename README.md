@@ -184,3 +184,29 @@ If you find this project useful, please consider giving it a star on GitHub!
 ---
 
 **Note**: This is a learning/portfolio project demonstrating modern .NET development practices including Clean Architecture, CQRS patterns, and comprehensive API design.
+
+## 🖥️ React UI (New)
+
+A ready-to-run React storefront is available in `frontend-react/` and is pre-wired to this API.
+
+### Run UI locally
+
+```bash
+cd frontend-react
+npm install
+npm run dev
+```
+
+By default it targets `http://localhost:5168`. You can override it with:
+
+```bash
+VITE_API_BASE_URL=http://localhost:5168 npm run dev
+```
+
+### UI Features
+
+- Login / register screen
+- Product listing with image, category, price, and add-to-cart
+- Cart summary with checkout action
+- Recent order history panel
+
